@@ -1,0 +1,7 @@
+Current_database_index=5
+Decorator_type=4
+Text_position=1
+Sound=1
+Number_of_entries=3
+Compact_mode=1
+Continuous_mode=1

@@ -1,0 +1,6 @@
+Database_id=0
+Next_object_id=0
+Database_id=5
+Next_object_id=0
+Database_id=0
+Next_object_id=0
