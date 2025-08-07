@@ -6,18 +6,18 @@
 
 class Object{
 public: 
-    Object(int id, std::string name, std::string type, int quantity);   // Constructor
+    Object(int id, std::string name, std::string type, int quantity); 
 
-    int get_id() const;
-    std::string get_name() const;
-    std::string get_type() const;
-    int get_quantity() const;
+               int     get_id()       const;
+    const std::string& get_name()     const;
+    const std::string& get_type()     const;
+               int     get_quantity() const;
 
 private:
-    int object_id;
-    std::string name;
-    std::string type;
-    int quantity;
+         int    object_id; // cppcheck-suppress unusedStructMember
+    std::string name;      // cppcheck-suppress unusedStructMember
+    std::string type;      // cppcheck-suppress unusedStructMember
+         int    quantity;
 };
 
 #endif // OBJECT

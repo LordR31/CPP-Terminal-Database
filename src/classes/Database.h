@@ -14,31 +14,32 @@
 #include <fstream>
 #include <curses.h>
 #include <fstream>
+#include "../utils.h"
 
 class Database{
 public:
     Database();
-    Database(int id, std::string name);                   // Database constructor for "create_database()"
-    ~Database();
-    int get_database_id();
-    std::string get_database_name();
+    Database(const int& id, const std::string& name);  // Database constructor for "create_database()"
     
-    void load_database(std::string database_identifiers); // Loads database identifiers & objects from file
-    void print_database();                           // Prints the database
+               int     get_database_id();
+    const std::string& get_database_name();
+    
+    void load_database(const std::string& database_identifiers); // Loads database identifiers & objects from file
+    bool print_database();                           // Prints the database
     void save_database(); // ADD TO NOTES!           // Saved database to file
-    void delete_database();                          // Deletes the database & file
+    int delete_database();                          // Deletes the database & file
 
-    void add_object();                               // Adds object to database
-    void delete_object();                            // Deletes objects from database
+    int add_object();                               // Adds object to database
+    bool delete_object();                            // Deletes objects from database
     
 private: 
-    void load_objects();                             // Loads objects from file. Called in "load_database()"
+         void   load_objects();                  // Loads objects from file. Called in "load_database()"
     std::string save_objects_to_file(int index);
 
-    int database_id = 0;
-    std::string database_name;
+         int            database_id = 0;
+    std::string         database_name; // cppcheck-suppress unusedStructMember
     std::vector<Object> database_objects;
-    int next_object_id = 0;
+         int            next_object_id = 0;
 };
 
 #endif // DATABASE

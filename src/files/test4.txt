@@ -1,6 +1,0 @@
-Database_id=3
-Next_object_id=0
-Database_id=3
-Next_object_id=0
-Database_id=3
-Next_object_id=0

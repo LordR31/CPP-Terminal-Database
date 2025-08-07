@@ -11,11 +11,11 @@ int Object::get_id() const{
     return object_id;
 }
 
-string Object::get_name() const{
+const string& Object::get_name() const{
     return name; 
 }
 
-string Object::get_type() const{
+const string& Object::get_type() const{
     return type;
 }
 

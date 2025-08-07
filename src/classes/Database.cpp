@@ -5,67 +5,126 @@ using namespace std;
 
 Database::Database(){}
 
-Database::Database(int id, string name): database_id(id), database_name(name){
-    printw("Database initialized and ready.\n");
+Database::Database(const int& id, const string& name): database_id(id), database_name(name){
+    // printw("Database initialized and ready.\n");
 }
-
-Database::~Database(){}
 
 int Database::get_database_id(){
     return database_id;
 }
 
-string Database::get_database_name(){
+const string& Database::get_database_name(){
     return database_name;
 }
 
-void Database::load_database(string database_identifiers){
+void Database::load_database(const string& database_identifiers){
     int pos = database_identifiers.find('.');
     database_id = stoi(database_identifiers.substr(0, pos));
     database_name = database_identifiers.substr(pos + 1);
     load_objects();
 }
 
-void Database::print_database(){
+bool Database::print_database(){
     while(true){
         clear();
-        if (database_objects.empty())
-            printw("\nDatabase is empty. No objects to display.\n");
-        else{
-            printw("\n--- Current Database Objects ---\n");
-            for (const auto& obj : database_objects)
-                printw("ID: %d,\tName: %s,\tType: %s,\tQuantity: %d\n",obj.get_id(), obj.get_name().c_str(), obj.get_type().c_str(), obj.get_quantity());
+        draw_main_box();
+        move(1, 3);
+        printw("%s", database_name.c_str());
+        move(1, COLS - 28);
+        printw("Terminal Database Manager");
+        draw_line();
+        refresh();
+        if(check_resize())
+            return 1;
+
+        bool is_empty = false;
+        bool is_paged = false;
+        if (database_objects.empty()){
+            move(8, COLS / 2 - 25);
+            printw("Database is empty. No objects to display.");
+            is_empty = true;
+        }else{
+            if(database_objects.size() > 5)
+                is_paged = true;
+
+            int i = static_cast<int>(database_objects.size()) - 1;
+            move(LINES - 5 - i, 3);
+            printw("ID");
+            move(LINES - 5 - i, 8);
+            printw("Name");
+            move(LINES - 5 - i, COLS - 10 - 15);
+            printw("Type");
+            move(LINES - 5 - i, COLS - 10);
+            printw("Quantity");
+
+            for (i; i >= 0; i--){
+                move(LINES - 4 - i, 3);
+                printw("%d",database_objects[i].get_id());
+                move(LINES - 4 - i, 8);
+                printw("%s",database_objects[i].get_name().c_str());
+                move(LINES - 4 - i, COLS - 10 - 15);
+                printw("%s", database_objects[i].get_type().c_str());
+                move(LINES - 4 - i, COLS - 10);
+                printw("%d", database_objects[i].get_quantity());
+            }
         }
-        printw("--------------------------------\n");
-        printw("1 Previous Page\t\t2 - Add item\t\t3 - Delete item\t\t4 - Quit\t\t5 - Next Page");  
+
+        if(is_paged){
+            move(LINES - 2, 2);
+            printw("1 - Previous Page");
+            move(LINES - 2, COLS - 15);
+            printw("5 - Next Page");
+        }
+        if(!is_empty){
+            move(LINES - 2, COLS - 15 - 14 - 8 - 15);
+            printw("3 - Delete item");
+        }
+
+        move(LINES - 2, COLS - 15 - 21 - 8 - 15 - 15);
+        printw("2 - Add item");
+        
+        move(LINES - 2, COLS - 15 - 7 - 8);
+        printw("4 - Back");
+        
         int choice = getch();
             switch (choice){
-                case 49: 
+                case 49: {
                     break;
-                case 50: 
+                }
+                case 50:{
                     add_object();
-                break;
-                case 51:
-                    delete_object();
+                    return 1;
+                }
+                case 51:{
+                    bool status = delete_object();
+                    while(status)
+                    status = delete_object();
+                    return 1;
                     break;
-                case 52:
-                    return;
+                }
+                case 52:{
+                    return 0;
                     break;
-                case 53:
+                }
+                case 53:{
                     break;
-                default:
-                    break;
+                }
+                default:{
+                    continue;
+                }
+                    
             }
+        return 0;
     }
 }
 
 void Database::save_database(){
-    string file = "../src/files/" + get_database_name() + ".txt";
+    string file = "../src/files/" + database_name + ".txt";
     ofstream output(file);
     
     output << "Database_id=" + to_string(database_id) + '\n';
     output << "Next_object_id=" + to_string(next_object_id) + '\n';
-    for(int i = 0; i < database_objects.size(); i++)
+    for(int i = 0; i < static_cast<int>(database_objects.size()); i++)
         output << save_objects_to_file(i);
     output.close();
 }
@@ -76,12 +135,17 @@ string Database::save_objects_to_file(int index){
     return object_in_string_format;
 }
 
-void Database::delete_database(){
+int Database::delete_database(){
     clear();
-    printw("WARNING!!\n Deleting a database is PERMANENT!\n");
-    printw("Type DELETE to confirm deleting the database!\n");
-    printw("Press Esc to cancel\n");
-    printw("----------------------------------\n\n");
+    draw_main_box();
+    move(5, COLS / 2 - 21);
+    printw("WARNING!! Deleting a database is PERMANENT!");
+    move(7, COLS / 2 - 22);
+    printw("Type DELETE to confirm deleting the database!");
+    move(8, COLS / 2 - 19);
+    printw("Leave blank and press Enter to cancel!");
+    draw_line();
+    move(LINES - 2, 3);
 
     echo();
     nocbreak();
@@ -90,34 +154,23 @@ void Database::delete_database(){
     noecho();
     cbreak();
 
+    if(confirmation[0] == '\0')
+        return 0;
+
     if(strcmp(confirmation, "DELETE") != 0){
+        move(LINES - 2, 3);
         printw("Invalid Input! Do you want to try again? (Y / N): ");
         int input = getch();
 
-        if(input == 121 || input == 89){ // lower and upper case y in ASCII
-            clear();
-            printw("WARNING!!\n Deleting a database is PERMANENT!\n");
-            printw("Type DELETE to confirm deleting the database!\n");
-            printw("Press Esc to cancel\n");
-            printw("----------------------------------\n\n");
-
-            echo();
-            nocbreak();
-            char confirmation[6];
-            getnstr(confirmation, sizeof(confirmation));
-            noecho();
-            cbreak();
-
-             if(strcmp(confirmation, "DELETE") != 0){
-                printw("There have been too many failed attempts to delete the database!");
-                return;
-            }
-        }else if(input == 'n')
-            return;
+        if(input == 121 || input == 89) // lower and upper case y in ASCII
+            return 1;
+        else if(input == 110 || input == 78)
+            return 0;
     }
     string database_path = "../src/files/" + get_database_name() + ".txt";
     remove(database_path.c_str());
-    // delete this;
+
+    return 2;
 }
 
 void Database::load_objects(){
@@ -125,9 +178,6 @@ void Database::load_objects(){
     ifstream file(file_path);
     
     string line;
-    stringstream object_stream(line);
-    vector<string> temp_object;
-    string temp_object_feature;
 
     // get database id
     getline(file, line);
@@ -139,38 +189,21 @@ void Database::load_objects(){
     pos = line.find('=');
     next_object_id = stoi(line.substr(pos + 1)); 
 
-    while(getline(file, line)){      
-        int temp_id;
-        string temp_name;
-        string temp_type;
-        int temp_quantity;
+    while(getline(file, line)){
+    int temp_id = 0;
+    string temp_name = "";
+    string temp_type = "";
+    int temp_quantity = 0;
 
-		char *token;
-		char *line_char = new char[line.length() + 1];
-        strcpy(line_char, line.c_str());
+    stringstream line_extractor(line);
+    line_extractor >> temp_id >> temp_name >> temp_type >> temp_quantity;
 
-        token = strtok(line_char, " ");
-		if (token != NULL)
-            temp_id = atoi(token);
-
-		token = strtok(NULL, " ");
-		if (token != NULL)
-            temp_name = token;
-
-		token = strtok(NULL, " ");
-		if (token != NULL)
-            temp_type = token;
-
-		token = strtok(NULL, " ");
-		if (token != NULL)
-            temp_quantity = atoi(token);
-
-        Object temp_object(temp_id, temp_name, temp_type, temp_quantity);
-        database_objects.emplace_back(temp_object);
-    }
+    Object temp_object(temp_id, temp_name, temp_type, temp_quantity);
+    database_objects.emplace_back(temp_object);
+}
 }
 
-void Database::add_object(){
+int Database::add_object(){
     while(true){
         clear();
         printw( "Objects are created using this format:\n");
@@ -205,35 +238,71 @@ void Database::add_object(){
             next_object_id++;
 
             printw("Object added to the database!");
-            return;
+            return 5;
         }catch(int errorCode){
             printw("Invalid object! Please make sure to follow the correct format!");
         }
     }
 }
 
-void Database::delete_object(){
-    clear();
-    printw("\nDelete by:\n");
-    printw("1. ID\n");
-    printw("2. Name\n");
-    printw("3. Type\n");
-    printw("\n\n0. Cancel\n");
-    printw("\nWARNING\n All objects matching will be deleted!!!\n\n");
+bool Database::delete_object(){
+    move(3,3);
+    printw("Delete by...");
+    move(1, COLS - 28);
+    printw("Terminal Database Manager");
+    move(5, 3);
+    printw("1. ID");
+    move(6, 3);
+    printw("2. Name");
+    move(7, 3);
+    printw("3. Type");
+    move(10, 3);
+    printw("WARNING!!!");
+    move(11, 3);
+    printw("All matching objects will be deleted!!!");
+    move(13, 3);        
+    printw("Press Enter to cancel and go back.");
+    draw_line();
+    refresh();
+        if(check_resize())
+            return 1;
+    
+    move(LINES - 2, 2);
+    for(int i = 2; i < COLS - 1; i++)
+        printw(" ");
 
     int choice = getch();
+
+    if(choice == 10)
+        return 0;
 
     size_t initial_size = database_objects.size(); // get initial size for comparison
     int deleted_count = 0;
 
     switch(choice){
     case 49:{
-        clear();
-        printw("\n\nDelete by ID\n");
-        printw("\n\nWARNING\n All objects matching will be deleted!!!\n\n");
-        printw("Press Enter to confirm\n");
-        printw("Press Esc to cancel\n");
-        printw("------------------------------------------------------------\n");
+        move(3,3);
+        printw("Delete by ID");
+        move(1, COLS - 28);
+        printw("Terminal Database Manager");
+
+        for(int i = 5; i < 9; i++)
+            for(int j = 3; j < 15; j++){
+                move(i, j);
+                printw(" ");
+            }
+        
+        move(10, 3);
+        printw("WARNING!!!");
+        move(11, 3);
+        printw("All matching objects will be deleted!!!");
+        move(13, 3);        
+        printw("Leave blank and press Enter to cancel and go back.");
+        draw_line();
+        move(LINES - 2, 3);
+        refresh();
+        if(check_resize())
+            return 1;
 
         echo();
         nocbreak();
@@ -242,36 +311,55 @@ void Database::delete_object(){
         noecho();
         cbreak();
 
+        if(id_to_delete[0] == '\0')
+            return 0;
+
         string id_to_delete_string = id_to_delete;
-        
-        // struct to check if object id matches user choice
         struct IsIdEqual{
                 int id_to_match;
-                IsIdEqual(int id) : id_to_match(id) {} 
+                explicit IsIdEqual(int id) : id_to_match(id) {} 
 
                 bool operator()(const Object& obj) const {
                     return obj.get_id() == id_to_match;
                 }
             };
 
-        // remove elements with remove_if
         database_objects.erase(remove_if(database_objects.begin(), database_objects.end(), IsIdEqual(stoi(id_to_delete_string))),
                                          database_objects.end());
 
         deleted_count = initial_size - database_objects.size();
-            if (deleted_count > 0)
-                printw("%d object(s) with ID %s deleted.\n", deleted_count, id_to_delete_string);
-            else
-                printw("No object found with ID %s.\n", id_to_delete_string);        
+        if (deleted_count > 0){
+            move(LINES - 2, 3);
+            printw("%d object(s) with ID %s deleted.", deleted_count, id_to_delete_string.c_str());
+        }else{
+            move(LINES - 2, 3);
+            printw("No object found with ID %s.", id_to_delete_string.c_str());        
+        }
         break;
     }
     case 50:{
-        clear();
-        printw("\n\nDelete by Name\n");
-        printw("\n\nWARNING\n All objects matching will be deleted!!!\n\n");
-        printw("Press Enter to confirm\n");
-        printw("Press Esc to cancel\n");
-        printw("------------------------------------------------------------\n");
+        move(1,3);
+        printw("Delete by Name");
+        move(1, COLS - 28);
+        printw("Terminal Database Manager");
+
+        for(int i = 5; i < 9; i++)
+            for(int j = 3; j < 15; j++){
+                move(i, j);
+                printw(" ");
+            }
+        
+        move(10, 3);
+        printw("WARNING!!!");
+        move(11, 3);
+        printw("All matching objects will be deleted!!!");
+        move(13, 3);        
+        printw("Leave blank and press Enter to cancel and go back.");
+        draw_line();
+        move(LINES - 2, 3);
+        refresh();
+        if(check_resize())
+            return 1;
 
         echo();
         nocbreak();
@@ -284,7 +372,7 @@ void Database::delete_object(){
 
         struct IsNameEqual {
             string name_to_match;
-            IsNameEqual(const string& name) : name_to_match(name) {}
+            explicit IsNameEqual(const string& name) : name_to_match(name) {}
                 
             bool operator()(const Object& obj) const {
                 return obj.get_name() == name_to_match;
@@ -295,19 +383,39 @@ void Database::delete_object(){
                                          database_objects.end());
 
         deleted_count = initial_size - database_objects.size();
-        if (deleted_count > 0)
-            printw("%d object(s) with Name %s deleted.\n", deleted_count, name_to_delete_string);
-        else
-            printw("No object found with Name %s.\n", name_to_delete_string);    
+        if (deleted_count > 0){
+            move(LINES - 2, 3);
+            printw("%d object(s) with Name %s deleted.", deleted_count, name_to_delete_string.c_str());
+        }else{
+            move(LINES - 2, 3);
+            printw("No object found with Name %s.", name_to_delete_string.c_str());    
+        }
         break;
     }
     case 51:{
-        clear();
-        printw("\n\nDelete by Type\n");
-        printw("\n\nWARNING\n All objects matching will be deleted!!!\n\n");
-        printw("Press Enter to confirm\n");
-        printw("Press Esc to cancel\n");
-        printw("------------------------------------------------------------\n");
+        move(1,3);
+        printw("Delete by Type");
+        move(1, COLS - 28);
+        printw("Terminal Database Manager");
+        
+        for(int i = 5; i < 9; i++)
+            for(int j = 3; j < 15; j++){
+                move(i, j);
+                printw(" ");
+            }
+        
+        move(10, 3);
+        printw("WARNING!!!");
+        move(11, 3);
+        printw("All matching objects will be deleted!!!");
+
+        move(13, 3);        
+        printw("Leave blank and press Enter to cancel and go back.");
+        draw_line();
+        move(LINES - 2, 3);
+        refresh();
+        if(check_resize())
+            return 1;
 
         echo();
         nocbreak();
@@ -320,7 +428,7 @@ void Database::delete_object(){
 
         struct IsTypeEqual {
             string type_to_match;
-            IsTypeEqual(const string& type) : type_to_match(type) {}
+            explicit IsTypeEqual(const string& type) : type_to_match(type) {}
                 
             bool operator()(const Object& obj) const {
                 return obj.get_type() == type_to_match;
@@ -331,14 +439,19 @@ void Database::delete_object(){
                                          database_objects.end());
 
         deleted_count = initial_size - database_objects.size();
-        if (deleted_count > 0)
-            printw("%d object(s) with Type %s deleted.\n", deleted_count, type_to_delete_string);
-        else
-            printw("No object found with Type %s.\n", type_to_delete_string); 
+        if (deleted_count > 0){
+            move(LINES - 2, 3);
+            printw("%d object(s) with Type %s deleted.", deleted_count, type_to_delete_string.c_str());
+        }else{
+            move(LINES - 2, 3);
+            printw("No object found with Type %s.", type_to_delete_string.c_str()); 
+        }
         break;
     }
-    default:
-        printw("Invalid choice. Please enter 1, 2 or 3.\n");
-        break;
+    default:{
+        return 1;
     }
+    }
+
+    return 0;
 }

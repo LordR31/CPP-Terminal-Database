@@ -7,27 +7,26 @@ Menu::Menu(){
     string input_settings = "../src/files/program_settings.txt";
     ifstream input(input_settings);
 
-    int settings[7];
-    int i = 0;
+    int settings_parameters[7] = {0};
     if(input.is_open()){
+        int i = 0;
         string line;
-        int index;
         while(getline(input, line)){
             size_t position = line.find("=");
-            settings[i] = line[position + 1] - '0';
+            settings_parameters[i] = line[position + 1] - '0';
             i++;
         }
     }
 
     input.close();
 
-    current_database_index=settings[0];
-    decorator_type = settings[1];
-    text_position = settings[2];
-    sound = settings[3];
-    number_of_entries = settings[4];
-    compact_mode = settings[5];
-    continuous_mode = settings[6];
+    current_database_index=settings_parameters[0];
+    decorator_type = settings_parameters[1];
+    text_position = settings_parameters[2];
+    sound = settings_parameters[3];
+    number_of_entries = settings_parameters[4];
+    compact_mode = settings_parameters[5];
+    continuous_mode = settings_parameters[6];
 
     // Init Databases from file
     ifstream available_databases("../src/files/index_manager.txt");
@@ -39,66 +38,86 @@ Menu::Menu(){
     }
     available_databases.close();
 
-    printw("Menu initialized and ready.\n");
+    // printw("Menu initialized and ready.\n");
 }
 
-void Menu::print_menu(){
+int Menu::print_menu(){
     while(true){
         clear();
-        printw("Main Menu \t\t\t\tTerminal Database");
-        printw("\n\n\n\n\n\n1.Manage Databases\n");
-        printw("2.Settings\n");
-        printw("3.Quit Program\n");
-        printw("-------------------------------------\n");
+        draw_main_box();
+        move(1,3);
+        printw("Main Menu");
+        move(1,COLS - 28);
+        printw("Terminal Database Manager");
+        move(LINES - 6,3);
+        printw("1. Manage Databases");
+        move(LINES - 5,3);
+        printw("2. Settings");
+        move(LINES - 4,3);
+        printw("3. Quit Program");
+        draw_line();
+        refresh();
+        if(check_resize())
+            return 0;
 
         int choice = getch();
 
         switch (choice){
         case 49: // 1 in ASCII
-            manage_database();
+            return 1;
             break;
         case 50: // 2 in ASCII
-            settings();
+            return 7;
             break;
         case 51: // 3 in ASCII
             endwin();
-            printw("Exitting program!\n");
             exit(0);
             break;
         default:
-            printw("Invalid Input!");
             break;
         }
     }
 }
 
-void Menu::manage_database(){
+int Menu::manage_database(){
     while(true){
-        clear();
-        printw("Manage Available databases\n\n");
-        printw("1. Create Database\n");
-        printw("2. Load Database\n");
-        printw("3. Delete Database\n");
-        printw("4. Print available databases\n");
-        printw("0. Back\n");
-        printw("------------------------\n");
+        clear(); 
+        draw_main_box(); 
+        move(1,3);
+        printw("Manage Available databases");
+        move(1, COLS - 28);
+        printw("Terminal Database Manager");
+        move(LINES - 7, 3);
+        printw("1. Create Database");
+        move(LINES - 6, 3);
+        printw("2. Load Database");
+        move(LINES - 5, 3);
+        printw("3. Delete Database");
+        move(LINES - 4, 3);
+        printw("4. Print available databases");
+        draw_line();
+        move(LINES - 2, 3);
+        printw("Press Enter to go back to main menu.");
+        refresh();
+        if(check_resize())
+            return 1;
 
         int choice = getch();
 
         switch (choice){
-        case 48: // 0 in ASCII
-            print_menu();
+        case 10: // Enter in ASCII
+            return 0;
         case 49: // 1 in ASCII
-            create_database();
+            return 2;
             break;
         case 50: // 2 in ASCII
-            load_database();
+            return 3;
             break;
         case 51: // 3 in ASCII
-            delete_database();
+            return 4;
             break;
         case 52: // 4 in ASCII
-            print_databases();
+            return 5;
             break;
         default:
             printw("Invalid Choice!");
@@ -107,40 +126,63 @@ void Menu::manage_database(){
     }
 }
 
-void Menu::load_database(){
+int Menu::load_database(){
     clear();
-    printw("Load Database\n\n");
-    printw("Available databases\n");
-    printw("-----------------------\n");
-
-    for(int i = 0; i < database_vector.size(); i++)
-        printw("%d.%s\n", database_vector[i].get_database_id(), database_vector[i].get_database_name().c_str());
+    draw_main_box();
+    move(1,3);
+    printw("Load Database");
+    move(1, COLS - 28);
+    printw("Terminal Database Manager");
     
-    printw("-------------------\n");
-    printw("\nSelect database:");
+    move(LINES / 2 - 4, COLS / 2 - 12);
+    printw("Press Enter to go back.");
+    refresh();
+    if(check_resize())
+            return 3;
+
+    int i = static_cast<int>(database_vector.size()) - 1;
+    move(LINES - 4 - i, 3);
+    printw("Available databases");
+
+    for(i; i > 0; i--){
+        move(LINES - 3 - i, 3);
+        printw("%d.%s", database_vector[i].get_database_id(), database_vector[i].get_database_name().c_str());
+    }
+    
+    draw_line();
+    move(LINES - 2, 3);
+    printw("Select database:");
 
     int choice = getch();
 
-    if((choice - '0') > database_vector.size()){
-        printw("\n Invalid choice! Try entering a valid index.\n");
-        printw("\nSelect database:");
-        choice = getch();
+    if(choice == 10)
+        return 1;
 
-        if(choice > database_vector.size()){
-            printw("\n There have been too many invalid choices!");
-            return;
-        }
+    if((choice - '0') > static_cast<int>(database_vector.size())){
+        move(LINES - 1, 3);
+        printw("\n Invalid choice! Try entering a valid index. Press Enter to continue...\n");
+        choice = getch();
+        return 3;
     }
     current_database = database_vector.at(choice - '0');
-    current_database.print_database();
-    current_database.save_database();
-    reload_database_vector();
+    return 6; // Go to The selected database menu
 }
 
-void Menu::create_database(){
-    printw("Create Database\n\n");
+int Menu::create_database(){
+    clear();
+    draw_main_box();
+    move(1,3);
+    printw("Create Database");
+    move(1, COLS - 28);
+    printw("Terminal Database Manager");
+    move(LINES / 2 - 4, COLS / 2 - 25);
+    printw("Leave blank and press Enter to cancel and go back!");
+    draw_line();
+    move(LINES - 2,3);
     printw("Database name: ");
-    
+    if(check_resize())
+        return 2;
+
     echo();     // enable echo 
     nocbreak(); // enable buffering
 
@@ -149,6 +191,9 @@ void Menu::create_database(){
 
     noecho(); // no echo
     cbreak(); // no buffering
+
+    if(database_name[0] == '\0')
+        return 1;
 
     string database_path = "../src/files/" + (string)database_name + ".txt";
 
@@ -168,142 +213,348 @@ void Menu::create_database(){
     reload_database_vector();
 
     printw("\nDatabase created successfully!\n");
+    return 1;
 }
 
-void Menu::delete_database(){
+int Menu::delete_database(){
     clear();
-    printw("Delete Database \t\t\t\t\t Terminal Database Manager\n");
-    printw("\n\n\nWARNING!!\nDeleting a database is PERMANENT!\n\n\n");
-    printw("Select the database you want to delete\n\n\n");
+    draw_main_box();
+    move(1, 3);
+    printw("Delete Database");
+    move(1, COLS - 28);
+    printw("Terminal Database Manager");
+    draw_line();
+    refresh();
+    if(check_resize())
+        return 4;
 
-    for(int i = 0; i < database_vector.size(); i++)
-        printw("%d.%s\n", i, database_vector[i].get_database_name().c_str());
+    int i = static_cast<int>(database_vector.size()) - 1;
+
+    move(LINES / 2 - 4, COLS / 2 - 5);
+    printw("WARNING!!!");
+    move(LINES / 2 - 3, COLS / 2 - 17);
+    printw("Deleting a database is PERMANENT!!!");
+    move(LINES / 2, COLS / 2 - 19);
+    printw("Leave blank and press Enter to go back");
+    move(LINES - 5 - i, 3);
+    printw("Available databases");
+    move(LINES - 2, 3);
+    printw("Select database:");
+
+    for(i; i >= 0; i--){
+        move(LINES - 4 - i, 3);    
+        printw("%d.%s", i, database_vector[i].get_database_name().c_str());
+    }
 
     int choice = getch();
 
-    if((choice - '0') > database_vector.size()){
-        printw("\n Invalid choice! Try entering a valid index.\n");
-        printw("\nSelect database:");
+    if(choice == 10)
+        return 1;
+
+    if((choice - '0') > static_cast<int>(database_vector.size())){
+        move(LINES - 2, 3);
+        printw("Invalid choice! Try entering a valid index. Select Index: ");
         choice = getch();
 
-        if(choice > database_vector.size()){
-            printw("\n There have been too many invalid choices!");
-            return;
+        if(choice > static_cast<int>(database_vector.size())){
+            move(LINES - 2, 3);
+            printw("There have been too many invalid choices!");
+            for(int j = 44; j < COLS; j++)
+                printw(" ");
+            return 1;
         }
     }
-    database_vector[choice - '0'].delete_database();
-    database_vector.erase(database_vector.begin() + (choice - '0'));
-    current_database_index = database_vector.size();
+    int status = database_vector[choice - '0'].delete_database();
+    if(status == 1)
+        database_vector[choice - '0'].delete_database();
+    if(status == 2){
+        database_vector.erase(database_vector.begin() + (choice - '0'));
+        current_database_index = database_vector.size();
+    }
 
     ofstream index_manager("../src/files/index_manager.txt");
-    for(int i = 0; i < database_vector.size(); i++)
-        index_manager << i << '.' << database_vector[i].get_database_name() << '\n';
+    for(int j = 0; j < static_cast<int>(database_vector.size()); j++)
+        index_manager << j << '.' << database_vector[j].get_database_name() << '\n';
     index_manager.close();
     save_settings();
     reload_database_vector();
+    return 1;
 }
 
-void Menu::print_databases(){
+int Menu::print_databases(){
     clear();
-    printw("Available Databases \t\t\t\t\tTerminal Database Manager\n");
-    printw("\n\n\n\n");
+    draw_main_box();
+    move(1, 3);
+    printw("Available Databases");
+    move(1, COLS - 28);
+    printw("Terminal Database Manager");
+    draw_line();
+    refresh();
+    if(check_resize())
+        return 1;
 
-    for(int i = 0; i < database_vector.size(); i++)
-        printw("%d.%s\n", i, database_vector[i].get_database_name().c_str());
+    int i = static_cast<int>(database_vector.size()) - 1;
 
+    move(LINES - i - 5, 3);
+    printw("Database ID");
+
+    move(LINES - i - 5, 20);
+    printw("Database Name");
+
+    for(i; i >= 0; i--){
+        move(LINES - 4 - i, 8);    
+        printw("%d", i);
+        move(LINES - 4 - i, 24);
+        printw("%s", database_vector[i].get_database_name().c_str());
+    }
+
+    move(LINES - 2, 3);
     printw("Press any key to go back...\n");
     getch();
-    manage_database();
+    return 1;
 }
 
-void Menu::settings(){
+int Menu::print_current_database(){
+    bool status = current_database.print_database();
+    while(status)
+        status = current_database.print_database();
+    current_database.save_database();
+    reload_database_vector();
+    return 3;
+}
+
+int Menu::settings(){
     while(true){
         clear();
-        printw("Settings \t\t\t Terminal Database Manager\n\n\n\n\n\n");
-        printw("1. Decorator type\n");
-        printw("2. Text position\n");
-        printw("3. Sound\n");
-        printw("4. Number of entries\n");
-        printw("5. Compact mode\n");
-        printw("6. Continuous mode\n");
-        printw("7. Save settings\n");
-        printw("----------------------------------------------\n");
+        draw_main_box();
+        move(1,3);
+        printw("Settings");
+        move(1, COLS - 28);
+        printw("Terminal Database Manager");
+        move(LINES - 10, 3);
+        printw("1. Decorator type");
+        move(LINES - 9, 3);
+        printw("2. Text position");
+        move(LINES - 8, 3);
+        printw("3. Sound");
+        move(LINES - 7, 3);
+        printw("4. Number of entries");
+        move(LINES - 6, 3);
+        printw("5. Compact mode");
+        move(LINES - 5, 3);
+        printw("6. Continuous mode");
+        move(LINES - 4, 3);
+        printw("7. Save settings");
+        draw_line();
+        move(LINES - 2, 3);
+        printw("Press Enter to go back to main menu.");
+        refresh();
+        if(check_resize())
+            return 7;
 
         int choice = getch();
 
         switch (choice){
         case 49:{
-            clear();
-            printw("Decorator Type\n");
-            printw("1. * (Current)\n");
-            printw("2. ~\n");
-            printw("3. +\n");
-            printw("4. /\n");
-            printw("-------------------------------------\n");
+            move(LINES - 10, 3);
+            for(int i = 0; i < 17; i++)
+                printw(" ");
+            move(LINES / 2 - 4, COLS / 2 - 8);
+            printw("Decorator Type:");
+            move(LINES / 2 - 4, COLS - 38);
+            printw("1. * (Current)");
+            move(LINES / 2 - 3, COLS - 38);
+            printw("2. ~");
+            move(LINES / 2 - 2, COLS - 38);
+            printw("3. +");
+            move(LINES / 2 - 1, COLS - 38);
+            printw("4. /");
+
+            move(LINES / 2 - 5, COLS / 2 - 10);
+            for(int i = 0; i < 19; i++)
+                printw("*");
+
+            move(LINES / 2 - 3, COLS / 2 - 10);
+            for(int i = 0; i < 19; i++)
+                printw("*");
+
+            move(LINES / 2 - 5, COLS - 40);
+            for(int i = 0; i < 18; i++)
+                printw("*");
+            
+            move (LINES / 2, COLS - 40);
+            for(int i = 0; i < 18; i++)
+                printw("*");
+            
 
             int decorator_choice = getch();
             decorator_type = decorator_choice - '0';
             break;
         }
         case 50:{
-            clear();
-            printw("Text position\n");
-            printw("1. Left side (Default)\n");
-            printw("2. Centered\n");
-            printw("-----------------------------\n");
+            move(LINES - 9, 3);
+            for(int i = 0; i < 16; i++)
+                printw(" ");
+            move(LINES / 2 - 4, COLS / 2 - 7);
+            printw("Text position:");
+            move(LINES / 2 - 4, COLS - 38);
+            printw("1. Left side (Default)");
+            move(LINES / 2 - 3, COLS - 38);
+            printw("2. Centered");
             
+            move(LINES / 2 - 5, COLS / 2 - 9);
+            for(int i = 0; i < 18; i++)
+                printw("*");
+
+            move(LINES / 2 - 3, COLS / 2 - 9);
+            for(int i = 0; i < 18; i++)
+                printw("*");
+
+            move(LINES / 2 - 5, COLS - 40);
+            for(int i = 0; i < 26; i++)
+                printw("*");
+            
+            move (LINES / 2 - 2, COLS - 40);
+            for(int i = 0; i < 26; i++)
+                printw("*");
+
             int text_choice = getch();
             text_position = text_choice - '0';
             break;
         }
         case 51:{
-            clear();
-            printw("Sound\n");
-            printw("1. ON (Default)\n");
-            printw("2. OFF\n");
-            printw("-----------------------------\n");
+            move(LINES - 8, 3);
+            for(int i = 0; i < 8; i++)
+                printw(" ");
+            move(LINES / 2 - 4, COLS / 2 - 2);
+            printw("Sound:");
+            move(LINES / 2 - 4, COLS - 38);
+            printw("1. ON");
+            move(LINES / 2 - 3, COLS - 38);
+            printw("2. OFF (Current)");
+
+            move(LINES / 2 - 5, COLS / 2 - 4);
+            for(int i = 0; i < 10; i++)
+                printw("*");
+
+            move(LINES / 2 - 3, COLS / 2 - 4);
+            for(int i = 0; i < 10; i++)
+                printw("*");
+
+            move(LINES / 2 - 5, COLS - 40);
+            for(int i = 0; i < 20; i++)
+                printw("*");
+            
+            move (LINES / 2 - 2, COLS - 40);
+            for(int i = 0; i < 20; i++)
+                printw("*");
 
             int sound_choice = getch();
             sound = sound_choice - '0';
             break;
         }
         case 52:{
-            clear();
-            printw("Number of entries\n");
-            printw("1. 3 Entries per page\n");
-            printw("2. 5 Entries per page (Default)\n");
-            printw("3. 7 Entries per page\n");
-            printw("----------------------------------------\n");
+            move(LINES - 7, 3);
+            for(int i = 0; i < 20; i++)
+                printw(" ");
+            move(LINES / 2 - 4, COLS / 2 - 9);
+            printw("Number of entries:");
+            move(LINES / 2 - 4, COLS - 38);
+            printw("1. 3 Entries per page");
+            move(LINES / 2 - 3, COLS - 38);
+            printw("2. 5 Entries per page (Current)");
+            move(LINES / 2 - 2, COLS - 38);
+            printw("3. 7 Entries per page");
+
+            move(LINES / 2 - 5, COLS / 2 - 11);
+            for(int i = 0; i < 22; i++)
+                printw("*");
+
+            move(LINES / 2 - 3, COLS / 2 - 11);
+            for(int i = 0; i < 22; i++)
+                printw("*");
+
+            move(LINES / 2 - 5, COLS - 40);
+            for(int i = 0; i < 35; i++)
+                printw("*");
+            
+            move (LINES / 2 - 1, COLS - 40);
+            for(int i = 0; i < 35; i++)
+                printw("*");
 
             int entries_choice = getch();
             number_of_entries = entries_choice - '0';
             break;
         }
         case 53:{
-            clear();
-            printw("Compact mode\n");
-            printw("1. OFF (Default)\n");
-            printw("2. ON\n");
-            printw("---------------------------------\n");
+            move(LINES - 6, 3);
+            for(int i = 0; i < 18; i++)
+                printw(" ");
+            move(LINES / 2 - 4, COLS / 2 - 6);
+            printw("Compact mode:");
+            move(LINES / 2 - 4, COLS - 38);
+            printw("1. OFF (Current)");
+            move(LINES / 2 - 3, COLS - 38);
+            printw("2. ON");
+            
+            move(LINES / 2 - 5, COLS / 2 - 8);
+            for(int i = 0; i < 17; i++)
+                printw("*");
+
+            move(LINES / 2 - 3, COLS / 2 - 8);
+            for(int i = 0; i < 17; i++)
+                printw("*");
+
+            move(LINES / 2 - 5, COLS - 40);
+            for(int i = 0; i < 20; i++)
+                printw("*");
+            
+            move (LINES / 2 - 2, COLS - 40);
+            for(int i = 0; i < 20; i++)
+                printw("*");
 
             int compact_choice = getch();
             compact_mode = compact_choice - '0';
             break;
         }
         case 54:{
-            clear();
-            printw("Continuous mode\n");
-            printw("1. OFF (Default)\n");
-            printw("2. ON\n");
-            printw("--------------------------------\n");
+            move(LINES - 5, 3);
+            for(int i = 0; i < 15; i++)
+                printw(" ");
+            move(LINES / 2 - 4, COLS / 2 - 8);
+            printw("Continuous mode:");
+            move(LINES / 2 - 4, COLS - 38);
+            printw("1. OFF (Current)");
+            move(LINES / 2 - 3, COLS - 38);
+            printw("2. ON");
             
+            move(LINES / 2 - 5, COLS / 2 - 10);
+            for(int i = 0; i < 20; i++)
+                printw("*");
+
+            move(LINES / 2 - 3, COLS / 2 - 10);
+            for(int i = 0; i < 20; i++)
+                printw("*");
+
+            move(LINES / 2 - 5, COLS - 40);
+            for(int i = 0; i < 20; i++)
+                printw("*");
+            
+            move (LINES / 2 - 2, COLS - 40);
+            for(int i = 0; i < 20; i++)
+                printw("*");
+
             int continuous_choice = getch();
             continuous_mode = continuous_choice - '0';
             break;
         }
         case 55:{
             save_settings();
-            print_menu();
+            return 0;
+        }
+        case 56:{
+            return 0;
+            break;
         }
         default:
             printw("\nInvalid choice!\n");

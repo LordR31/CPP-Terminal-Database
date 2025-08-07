@@ -11,6 +11,7 @@ main.cpp
 classes/Object.cpp
 classes/Database.cpp
 classes/Menu.cpp
+utils.cpp
 )
 
 target_link_libraries(TerminalDatabaseApp PRIVATE ${CURSES_LIBRARIES})

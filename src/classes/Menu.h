@@ -9,23 +9,27 @@
 #include <vector>
 #include <filesystem>
 #include "Database.h"
+#include "../utils.h"
 
 class Menu{
 public:
     Menu();
 
-    void print_menu();
-    void manage_database();
-    void load_database();
-    void create_database();
-    void delete_database();
-    void print_databases();
-    void settings();
+    int print_menu();
+    int manage_database();
+    int load_database();
+    int create_database();
+    int delete_database();
+    int print_databases();
+    int print_current_database();
+    int settings();
     void save_settings();
 
 private:
     void reload_database_vector();
-    std::vector<Database> database_vector; // Holds the available databases
+    
+    // Holds the available databases
+    std::vector<Database> database_vector; // cppcheck-suppress unusedStructMember
     Database current_database;
 
     int current_database_index = 0;
