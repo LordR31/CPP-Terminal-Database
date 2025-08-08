@@ -23,14 +23,15 @@ public:
     
                int     get_database_id();
     const std::string& get_database_name();
+               int     get_number_of_objects();
     
     void load_database(const std::string& database_identifiers); // Loads database identifiers & objects from file
-    bool print_database();                           // Prints the database
+    int print_database(char decorator, int number_of_entries, int page_number, bool sound);                           // Prints the database
     void save_database(); // ADD TO NOTES!           // Saved database to file
-    int delete_database();                          // Deletes the database & file
+    int delete_database(char decorator, bool sound);                          // Deletes the database & file
 
-    int add_object();                               // Adds object to database
-    bool delete_object();                            // Deletes objects from database
+    int add_object(char decorator, bool sound);                               // Adds object to database
+    bool delete_object(char decorator, bool sound);                            // Deletes objects from database
     
 private: 
          void   load_objects();                  // Loads objects from file. Called in "load_database()"

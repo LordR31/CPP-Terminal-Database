@@ -1,2 +1,3 @@
 Database_id=2
-Next_object_id=0
+Next_object_id=1
+0 test_item hartie 31

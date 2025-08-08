@@ -1,7 +1,0 @@
-Database_id=1
-Next_object_id=6
-0 test_item s 13
-1 test2 s 2
-2 test h 3
-4 test hg 2
-5 test sticla 3

@@ -17,6 +17,10 @@ const string& Database::get_database_name(){
     return database_name;
 }
 
+int Database::get_number_of_objects(){
+    return database_objects.size();
+}
+
 void Database::load_database(const string& database_identifiers){
     int pos = database_identifiers.find('.');
     database_id = stoi(database_identifiers.substr(0, pos));
@@ -24,15 +28,15 @@ void Database::load_database(const string& database_identifiers){
     load_objects();
 }
 
-bool Database::print_database(){
+int Database::print_database(char decorator, int number_of_entries, int page_number, bool sound){
     while(true){
         clear();
-        draw_main_box();
+        draw_main_box(decorator);
         move(1, 3);
         printw("%s", database_name.c_str());
         move(1, COLS - 28);
         printw("Terminal Database Manager");
-        draw_line();
+        draw_line(decorator);
         refresh();
         if(check_resize())
             return 1;
@@ -44,28 +48,34 @@ bool Database::print_database(){
             printw("Database is empty. No objects to display.");
             is_empty = true;
         }else{
-            if(database_objects.size() > 5)
+            if(database_objects.size() > number_of_entries)
                 is_paged = true;
 
-            int i = static_cast<int>(database_objects.size()) - 1;
-            move(LINES - 5 - i, 3);
+            move(LINES - 4 - number_of_entries - 1, 3);
             printw("ID");
-            move(LINES - 5 - i, 8);
+            move(LINES - 4 - number_of_entries - 1, 8);
             printw("Name");
-            move(LINES - 5 - i, COLS - 10 - 15);
+            move(LINES - 4 - number_of_entries - 1, COLS - 10 - 50);
             printw("Type");
-            move(LINES - 5 - i, COLS - 10);
+            move(LINES - 4 - number_of_entries - 1, COLS - 10);
             printw("Quantity");
 
-            for (i; i >= 0; i--){
-                move(LINES - 4 - i, 3);
-                printw("%d",database_objects[i].get_id());
-                move(LINES - 4 - i, 8);
-                printw("%s",database_objects[i].get_name().c_str());
-                move(LINES - 4 - i, COLS - 10 - 15);
-                printw("%s", database_objects[i].get_type().c_str());
-                move(LINES - 4 - i, COLS - 10);
-                printw("%d", database_objects[i].get_quantity());
+            string page_number_string = "Page " + to_string(page_number);
+            move(LINES / 2, COLS / 2 - page_number_string.length() / 2);
+            printw("%s", page_number_string.c_str());
+
+            for(int i = 0; i < number_of_entries; i++){
+                if(i + page_number * number_of_entries < database_objects.size()){
+                    move(LINES - 4 - i, 3);
+                    printw("%d",database_objects[i + page_number * number_of_entries].get_id());
+                    move(LINES - 4 - i, 8);
+                    printw("%s",database_objects[i + page_number * number_of_entries].get_name().c_str());
+                    move(LINES - 4 - i, COLS - 10 - 50);
+                    printw("%s", database_objects[i + page_number * number_of_entries].get_type().c_str());
+                    move(LINES - 4 - i, COLS - 5 - to_string(database_objects[i + page_number * number_of_entries].get_quantity()).length() / 2 - 1);
+                    printw("%d", database_objects[i + page_number * number_of_entries].get_quantity());
+                    refresh();
+                }
             }
         }
 
@@ -87,32 +97,37 @@ bool Database::print_database(){
         printw("4 - Back");
         
         int choice = getch();
+        if(sound)
+            beep();
             switch (choice){
                 case 49: {
-                    break;
+                    if(is_paged)
+                        return 1;
+                    else
+                        continue;
                 }
                 case 50:{
-                    add_object();
-                    return 1;
+                    add_object(decorator, sound);
+                    continue;
                 }
                 case 51:{
-                    bool status = delete_object();
+                    bool status = delete_object(decorator, sound);
                     while(status)
-                    status = delete_object();
-                    return 1;
-                    break;
+                        status = delete_object(decorator, sound);
+                    continue;
                 }
                 case 52:{
                     return 0;
-                    break;
                 }
                 case 53:{
-                    break;
+                    if(is_paged)                    
+                        return 2;
+                    else
+                        continue;
                 }
                 default:{
                     continue;
-                }
-                    
+                }    
             }
         return 0;
     }
@@ -135,22 +150,24 @@ string Database::save_objects_to_file(int index){
     return object_in_string_format;
 }
 
-int Database::delete_database(){
+int Database::delete_database(char decorator, bool sound){
     clear();
-    draw_main_box();
+    draw_main_box(decorator);
     move(5, COLS / 2 - 21);
     printw("WARNING!! Deleting a database is PERMANENT!");
     move(7, COLS / 2 - 22);
     printw("Type DELETE to confirm deleting the database!");
     move(8, COLS / 2 - 19);
     printw("Leave blank and press Enter to cancel!");
-    draw_line();
+    draw_line(decorator);
     move(LINES - 2, 3);
 
     echo();
     nocbreak();
     char confirmation[6];
     getnstr(confirmation, sizeof(confirmation));
+    if(sound)
+        beep();
     noecho();
     cbreak();
 
@@ -161,6 +178,8 @@ int Database::delete_database(){
         move(LINES - 2, 3);
         printw("Invalid Input! Do you want to try again? (Y / N): ");
         int input = getch();
+        if(sound)
+            beep();
 
         if(input == 121 || input == 89) // lower and upper case y in ASCII
             return 1;
@@ -203,24 +222,40 @@ void Database::load_objects(){
 }
 }
 
-int Database::add_object(){
+int Database::add_object(char decorator, bool sound){
     while(true){
         clear();
-        printw( "Objects are created using this format:\n");
-        printw( "\t\t**********************\n");
-        printw( "\t\t* name type quantity *\n");
-        printw( "\t\t**********************\n");
-        printw("\nPress Enter to confirm");
-        printw("\nPress Esc to cancel\n");
-        printw("----------------------------------------\n");
+        draw_main_box(decorator);
+        move(1,3);
+        printw("Add Object");
+        move(1, COLS - 28);
+        printw("Terminal Database Manager");
+
+        move(LINES / 2 - 4, COLS / 2 - 23);
+        printw( "Objects are created using the following format:");
+        move(LINES / 2 - 5, COLS - 30);
+        printw( "**********************");
+        move(LINES / 2 - 4, COLS - 28);
+        printw( "name type quantity");
+        move(LINES / 2 - 3, COLS - 30);
+        printw( "**********************");
+        move(LINES - 4, 3);
+        printw("Leave blank and press Enter to cancel and go back");
+        draw_line(decorator);
+        move(LINES - 2, 3);
 
         echo();
         nocbreak();
         char object[256];
         getnstr(object, sizeof(object) - 1);
+        if(sound)
+            beep();
         string object_string = object;
         noecho();
         cbreak();
+
+        if(object[0] == '\0')
+            return 5;
 
         stringstream new_object(object_string);
         vector<string> temp_object;
@@ -245,7 +280,7 @@ int Database::add_object(){
     }
 }
 
-bool Database::delete_object(){
+bool Database::delete_object(char decorator, bool sound){
     move(3,3);
     printw("Delete by...");
     move(1, COLS - 28);
@@ -262,7 +297,7 @@ bool Database::delete_object(){
     printw("All matching objects will be deleted!!!");
     move(13, 3);        
     printw("Press Enter to cancel and go back.");
-    draw_line();
+    draw_line(decorator);
     refresh();
         if(check_resize())
             return 1;
@@ -272,6 +307,8 @@ bool Database::delete_object(){
         printw(" ");
 
     int choice = getch();
+    if(sound)
+        beep();
 
     if(choice == 10)
         return 0;
@@ -298,7 +335,7 @@ bool Database::delete_object(){
         printw("All matching objects will be deleted!!!");
         move(13, 3);        
         printw("Leave blank and press Enter to cancel and go back.");
-        draw_line();
+        draw_line(decorator);
         move(LINES - 2, 3);
         refresh();
         if(check_resize())
@@ -308,6 +345,8 @@ bool Database::delete_object(){
         nocbreak();
         char id_to_delete[10];
         getnstr(id_to_delete, sizeof(id_to_delete) - 1);
+        if(sound)
+            beep();
         noecho();
         cbreak();
 
@@ -355,7 +394,7 @@ bool Database::delete_object(){
         printw("All matching objects will be deleted!!!");
         move(13, 3);        
         printw("Leave blank and press Enter to cancel and go back.");
-        draw_line();
+        draw_line(decorator);
         move(LINES - 2, 3);
         refresh();
         if(check_resize())
@@ -365,6 +404,8 @@ bool Database::delete_object(){
         nocbreak();
         char name_to_delete[256];
         getnstr(name_to_delete, sizeof(name_to_delete) - 1);
+        if(sound)
+            beep();
         noecho();
         cbreak();
 
@@ -411,7 +452,7 @@ bool Database::delete_object(){
 
         move(13, 3);        
         printw("Leave blank and press Enter to cancel and go back.");
-        draw_line();
+        draw_line(decorator);
         move(LINES - 2, 3);
         refresh();
         if(check_resize())
@@ -421,6 +462,8 @@ bool Database::delete_object(){
         nocbreak();
         char type_to_delete[256];
         getnstr(type_to_delete, sizeof(type_to_delete) - 1);
+        if(sound)
+            beep();
         noecho();
         cbreak();
 
