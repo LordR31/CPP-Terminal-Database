@@ -184,16 +184,16 @@ int Menu::load_database(){
 
     int i = static_cast<int>(database_vector.size()) - 1;
     if(text_position == 1)
-            move(LINES - 5 - i, 3);
+            move(LINES - 6 - i, 3);
         else
-            move(LINES - 5 - i, COLS / 2 - 9);
+            move(LINES - 6 - i, COLS / 2 - 9);
     printw("Available databases");
 
-    for(i; i > 0; i--){
+    for(i; i >= 0; i--){
         if(text_position == 1)
-            move(LINES - 3 - i, 3);
+            move(LINES - 4 - i, 3);
         else
-            move(LINES - 3 - i, COLS / 2 - (database_vector[i].get_database_name().length() / 2));
+            move(LINES - 4 - i, COLS / 2 - (database_vector[i].get_database_name().length() / 2));
         printw("%d.%s", i, database_vector[i].get_database_name().c_str());
     }
     
@@ -445,7 +445,7 @@ int Menu::print_current_database(){
                 else
                     current_database_page_number++;
             else
-                if(current_database_page_number < current_database.get_number_of_objects() % number_of_entries)
+                if(current_database_page_number < current_database.get_number_of_objects() / number_of_entries)
                     current_database_page_number ++;
 
             status = current_database.print_database(decorator_type, number_of_entries, current_database_page_number, sound);

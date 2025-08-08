@@ -20,19 +20,19 @@ int main() {
     clear();
     refresh();
     move(1, COLS - 28);
-    printw("Database Terminal Manager");
+    printw("Terminal Database Manager");
     move(LINES - 17,3);
     printw("Loading files...");
     move(LINES - 16,3);
     printw("[");
     move(LINES - 16,24);
     printw("]");
-    // for(int i = 0; i < 20; i++){
-    //     move(LINES - 16, 4 + i);
-    //     printw("#");
-    //     refresh();
-    //     this_thread::sleep_for(chrono::milliseconds(100));
-    // }
+    for(int i = 0; i < 20; i++){
+        move(LINES - 16, 4 + i);
+        printw("#");
+        refresh();
+        this_thread::sleep_for(chrono::milliseconds(100));
+    }
 
     move(LINES - 14,3);
     printw("Menu loading...");
@@ -40,12 +40,12 @@ int main() {
     printw("[");
     move(LINES - 13,24);
     printw("]");
-    // for(int i = 0; i < 20; i++){
-    //     move(LINES - 13, 4 + i);
-    //     printw("#");
-    //     refresh();
-    //     this_thread::sleep_for(chrono::milliseconds(25));
-    // }
+    for(int i = 0; i < 20; i++){
+        move(LINES - 13, 4 + i);
+        printw("#");
+        refresh();
+        this_thread::sleep_for(chrono::milliseconds(25));
+    }
 
     move(LINES - 11, 3);
     printw("Database loading...");
@@ -53,12 +53,12 @@ int main() {
     printw("[");
     move(LINES - 10,24);
     printw("]");
-    // for(int i = 0; i < 20; i++){
-    //     move(LINES - 10, 4 + i);
-    //     printw("#");
-    //     refresh();
-    //     this_thread::sleep_for(chrono::milliseconds(80));
-    // }
+    for(int i = 0; i < 20; i++){
+        move(LINES - 10, 4 + i);
+        printw("#");
+        refresh();
+        this_thread::sleep_for(chrono::milliseconds(80));
+    }
 
     move(LINES - 8,3);
     printw("Loading finished!");
