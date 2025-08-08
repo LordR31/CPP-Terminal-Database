@@ -4,7 +4,7 @@
 using namespace std;
 
 Menu::Menu(){
-    string input_settings = "../src/files/program_settings.txt";
+    string input_settings = "../src/program_settings.txt";
     ifstream input(input_settings);
 
     int settings_parameters[7] = {0};
@@ -43,7 +43,7 @@ Menu::Menu(){
     continuous_mode = settings_parameters[6];
 
     // Init Databases from file
-    ifstream available_databases("../src/files/index_manager.txt");
+    ifstream available_databases("../src/index_manager.txt");
     string line;
     while(getline(available_databases, line)){
         Database temp_database;
@@ -265,7 +265,7 @@ int Menu::create_database(){
     output.close();
 
     ofstream index_manager;
-    index_manager.open("../src/files/index_manager.txt", ios::app);
+    index_manager.open("../src/index_manager.txt", ios::app);
     index_manager << current_database_index << "." << database_name << endl;
     index_manager.close();
 
@@ -908,7 +908,7 @@ int Menu::settings(){
 void Menu::save_settings(){
     printw("Saving...");
 
-    ofstream save_settings("../src/files/program_settings.txt");
+    ofstream save_settings("../src/program_settings.txt");
 
     save_settings << "Current_database_index=" << current_database_index << endl;
     switch (decorator_type){
@@ -936,7 +936,7 @@ void Menu::save_settings(){
 }
 
 void Menu::reload_database_vector(){
-    ifstream available_databases("../src/files/index_manager.txt");
+    ifstream available_databases("../src/index_manager.txt");
     string line;
     database_vector.clear();
     while(getline(available_databases, line)){
