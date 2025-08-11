@@ -1,9 +1,9 @@
 // main.cpp
 #include <iostream>
-// #include "classes/Object.h"   
-// #include "classes/Database.h"
 #include "classes/Menu.h"
 #include "utils.h"
+
+// for the start-up animaiton
 #include "chrono"
 #include "thread"
 
@@ -16,6 +16,7 @@ int main() {
     noecho();             // no echo
     keypad(stdscr, TRUE); // enable special keys
 
+    // Start-up Animation
     set_window_size();
     clear();
     refresh();
@@ -68,10 +69,10 @@ int main() {
     getch();
     clear();
 
-    Menu main_menu;
+    Menu main_menu; // init main_menu
 
     int current_menu = 0;
-        while(true){
+    while(true){ // access the right menu, depending on each function's return
         switch (current_menu){
         case 0:
             current_menu = main_menu.print_menu();    
@@ -102,6 +103,6 @@ int main() {
         }
     }
 
-    endwin();
+    endwin(); // terminate ncurses mode
     return 0;
 }

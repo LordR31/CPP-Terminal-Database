@@ -1,2 +1,1 @@
-0.very_long_name_for_testing
-1.test
+0.test_database

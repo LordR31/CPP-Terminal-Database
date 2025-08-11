@@ -8,7 +8,7 @@
 #include <string>
 #include <cstring>
 #include <iostream>
-#include <algorithm>  // Required for std::remove_if, std::find_if
+#include <algorithm>  // for remove_if and find_if
 #include <sstream>
 #include <vector>
 #include <fstream>
@@ -18,29 +18,30 @@
 
 class Database{
 public:
-    Database();
-    Database(const int& id, const std::string& name);  // Database constructor for "create_database()"
+    Database();                                                                             // Empty constructor
+    Database(const int& id, const std::string& name);                                       // Database constructor for "create_database()"
     
-               int     get_database_id();
+    int get_database_id();
     const std::string& get_database_name();
-               int     get_number_of_objects();
+    int get_number_of_objects();
     
-    void load_database(const std::string& database_identifiers); // Loads database identifiers & objects from file
-    int print_database(char decorator, int number_of_entries, int page_number, bool sound);                           // Prints the database
-    void save_database(); // ADD TO NOTES!           // Saved database to file
-    int delete_database(char decorator, bool sound);                          // Deletes the database & file
+    void load_database(const std::string& database_identifiers);                            // Loads database identifiers & objects from file
+    int print_database(char decorator, int number_of_entries, int page_number, bool sound); // Prints the database
+    void save_database();                                                                   // Saved database to file
+    int delete_database(char decorator, bool sound);                                        // Deletes the database & file
 
-    int add_object(char decorator, bool sound);                               // Adds object to database
-    bool delete_object(char decorator, bool sound);                            // Deletes objects from database
+    int add_object(char decorator, bool sound);                                             // Adds object to database
+    bool delete_object(char decorator, bool sound);                                         // Deletes objects from database
     
 private: 
-         void   load_objects();                  // Loads objects from file. Called in "load_database()"
-    std::string save_objects_to_file(int index);
+    void load_objects();                         // Loads objects from file. Called in "load_database()"
+    std::string save_objects_to_file(int index); // Saves the database objects to the database file
 
-         int            database_id = 0;
-    std::string         database_name; // cppcheck-suppress unusedStructMember
-    std::vector<Object> database_objects;
-         int            next_object_id = 0;
+    int database_id = 0;                         // "unique" database id
+                                                 // database name
+    std::string database_name;                   // cppcheck-suppress unusedStructMember
+    std::vector<Object> database_objects;        // vector with all the database objects
+    int next_object_id = 0;                      // the index used when creating a new object and adding it to the database
 };
 
 #endif // DATABASE

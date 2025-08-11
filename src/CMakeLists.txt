@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 
 project(TerminalDatabaseApp CXX)
 
-# include_directories(classes)
+include_directories(classes)
 
 find_package(Curses REQUIRED)
 
