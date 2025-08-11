@@ -4,7 +4,7 @@
 using namespace std;
 
 Menu::Menu(){
-    string input_settings = "../src/program_settings.txt"; // path to program_settings
+    string input_settings = "program_settings.txt"; // path to program_settings
     ifstream input;
 
     // check if program settings can be opened
@@ -15,7 +15,7 @@ Menu::Menu(){
         ofstream output(input_settings);                            // if it can't be opened, create it 
         
         ifstream get_database_index;                                // try to open index_manager to get database index to avoid loss of data
-        get_database_index.open("../src/index_manager.txt");
+        get_database_index.open("index_manager.txt");
         int index = 0;
         if(get_database_index.is_open()){                           // if it was opened, get database index
             string line;
@@ -23,7 +23,7 @@ Menu::Menu(){
             index++;
         }else{                                                      // otherwise, create index_manager
             ofstream create_index_manager;
-            create_index_manager.open("../src/index_manager.txt");
+            create_index_manager.open("index_manager.txt");
             if(!create_index_manager.is_open()){                    // if it cannot be created, cry error and exit.
                 cout << "ERROR: Could not initialize settings!!";
                 exit(0);
@@ -83,7 +83,7 @@ Menu::Menu(){
 
     // read the index_manager to get the existing databases
     ifstream available_databases;
-    available_databases.open("../src/index_manager.txt"); 
+    available_databases.open("index_manager.txt"); 
     if(available_databases.is_open()){                          // check again if the file exists... it SHOULD exist!
         string line;
         while(getline(available_databases, line)){
@@ -94,9 +94,9 @@ Menu::Menu(){
     } else{                                                     // if it doesn't exist somehow, create it, but risk LOSING data
         available_databases.clear();
         ofstream output;
-        output.open("../src/index_manager.txt");
+        output.open("index_manager.txt");
         output.close();
-        available_databases.open("../src/index_manager.txt");
+        available_databases.open("index_manager.txt");
     }
 
     if(!available_databases.is_open()){                         // if it cannot be opened after it was created, cry error and exit!
@@ -319,7 +319,7 @@ int Menu::create_database(){
     if(database_name[0] == '\0')                                              // if the user pressed Enter, go back 
         return 1;
 
-    string database_path = "../src/files/" + (string)database_name + ".txt";  // otherwise, create the path to the database 
+    string database_path = "files/" + (string)database_name + ".txt";  // otherwise, create the path to the database 
 
     ofstream output;                                                          
     output.open(database_path, ios::app);                                     // create the file OR open in append to prevent loss of data
@@ -329,7 +329,7 @@ int Menu::create_database(){
                                                                               // TODO: CHECK IF FILE ALREADY EXISTS AND WARN USER!!!
 
     ofstream index_manager;
-    index_manager.open("../src/index_manager.txt", ios::app);                 // open index_manager to add the new database to "memory"
+    index_manager.open("index_manager.txt", ios::app);                 // open index_manager to add the new database to "memory"
     index_manager << current_database_index << "." << database_name << endl;  // add the database index and name
     index_manager.close();                                                    // close the file
 
@@ -430,7 +430,7 @@ int Menu::delete_database(){
         if(status == 2){                                                                     // status = 2 -> Confirmation; status = 0 -> Cancelled
             database_vector.erase(database_vector.begin() + (choice ));                      // when the deletion was confirmed, remove the database from the vector
             current_database_index = database_vector.size();                                 // get the new current_database_index
-            ofstream index_manager("../src/index_manager.txt");                              // rewrite index_manager
+            ofstream index_manager("index_manager.txt");                              // rewrite index_manager
             for(int j = 0; j < static_cast<int>(database_vector.size()); j++) 
                 index_manager << j << '.' << database_vector[j].get_database_name() << '\n';
             index_manager.close();                                                           // close the file
@@ -1004,7 +1004,7 @@ int Menu::settings(){
 void Menu::save_settings(){
     printw("Saving...");
 
-    ofstream save_settings("../src/program_settings.txt");                        // open program_settings
+    ofstream save_settings("program_settings.txt");                        // open program_settings
 
     // write the settings as chosen by user
     save_settings << "Current_database_index=" << current_database_index << endl;
@@ -1033,7 +1033,7 @@ void Menu::save_settings(){
 }
 
 void Menu::reload_database_vector(){
-    ifstream available_databases("../src/index_manager.txt"); // open index_manager
+    ifstream available_databases("index_manager.txt"); // open index_manager
     string line;
     database_vector.clear();                                  // clear the database_vector
     while(getline(available_databases, line)){                // so long as there are lines to read
