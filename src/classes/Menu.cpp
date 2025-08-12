@@ -248,8 +248,6 @@ int Menu::load_database(){
     move(LINES / 2 - 4, COLS / 2 - 11);
     printw("Press Enter to go back.");
     refresh();
-    if(check_resize())                   // check if the window was resized by the user and re-enter the menu to re-draw everything
-            return 3;
 
     int i = static_cast<int>(database_vector.size()) - 1;
     if(text_position == 1)                                                                         // check if text should be left side aligned or centered and write accordingly
@@ -274,6 +272,9 @@ int Menu::load_database(){
     printw("Select database:");
 
     int choice = getch(); // get user input
+    if(check_resize())    // check if the window was resized by the user and re-enter the menu to re-draw everything
+            return 3;
+
     if(sound)             // make ANNOYING sound if sound turned on 
         beep();
 
@@ -312,8 +313,6 @@ int Menu::create_database(){
         else
             move(LINES - 2, COLS / 2 - 7);
     printw("Database name: ");
-    if(check_resize())                                            // check if the window was resized by the user and re-enter the menu to re-draw everything
-        return 2;
 
     echo();                                            // enable echo 
     nocbreak();                                        // enable buffering
@@ -323,6 +322,9 @@ int Menu::create_database(){
         beep();
     noecho();                                          // no echo
     cbreak();                                          // no buffering
+
+    if(check_resize())                                 // check if the window was resized by the user and re-enter the menu to re-draw everything
+        return 2;
 
     if(database_name[0] == '\0')                                          // if the user pressed Enter, go back 
         return 1;
@@ -363,8 +365,6 @@ int Menu::delete_database(){
     printw("Terminal Database Manager");
     draw_line(decorator_type);           // draw the bottom line
     refresh();
-    if(check_resize())                   // check if the window was resized by the user and re-enter the menu to re-draw everything
-        return 4;
 
     // write out the menu options, infos and warnings
     int i = static_cast<int>(database_vector.size()) - 1;
@@ -400,6 +400,11 @@ int Menu::delete_database(){
     nocbreak();                                // enable buffering
     char choice_char[2];
     getnstr(choice_char, sizeof(choice_char)); // get user input
+    if(check_resize()){                        // check if the window was resized by the user and re-enter the menu to re-draw everything
+        noecho();                              // disable echo
+        cbreak();                              // disable buffering
+        return 4;
+    }
     if(sound)                                  // make ANNOYING sound if sound turned on
         beep();
     noecho();                                  // disable echo
@@ -418,6 +423,13 @@ int Menu::delete_database(){
             move(LINES - 2, COLS / 2 - 29);
         printw("Invalid choice! Try entering a valid index. Select Index: "); // and warn him about it
         choice = getch();                                                     // get user input AGAIN
+        if(check_resize()){                                                   // check if the window was resized by the user and re-enter the menu to re-draw everything
+            noecho();                                                         // disable echo
+            cbreak();                                                         // disable buffering
+            return 4;
+        }
+        noecho();                                                             // disable echo
+        cbreak();                                                             // disable buffering
         if(sound)                                                             // make ANNOYING sound if sound turned on
             beep();
 
@@ -447,6 +459,11 @@ int Menu::delete_database(){
     nocbreak();                                  // buffering on
     char confirmation[6];                        
     getnstr(confirmation, sizeof(confirmation)); // get user input
+    if(check_resize()){                          // check if the window was resized by the user and re-enter the menu to re-draw everything
+            noecho();                            // disable echo
+            cbreak();                            // disable buffering
+            return 4;
+    }
     if(sound)                                    // make ANNOYING sound if sound turned on
         beep(); 
     noecho();                                    // no echo
@@ -461,6 +478,8 @@ int Menu::delete_database(){
             move(LINES - 2, 3);
             printw("Invalid Input! Do you want to try again? (Y / N): ");           // warn them and ask if they want to try again
             int input = getch();
+            if(check_resize())                                                      // check if the window was resized by the user and re-enter the menu to re-draw everything
+                return 4;
             if(sound)
                 beep();
 
@@ -499,8 +518,6 @@ int Menu::print_databases(){
     printw("Terminal Database Manager");
     draw_line(decorator_type);           // draw the bottom line
     refresh();
-    if(check_resize())                   // check if the window was resized by the user and re-enter the menu to re-draw everything
-        return 1;
 
     if(static_cast<int>(database_vector.size() > 0)){         // check if there are any entries to print                                                      
         int i = static_cast<int>(database_vector.size() - 1); // get the number of entries to know how to arange the menu
@@ -543,6 +560,8 @@ int Menu::print_databases(){
         move(LINES - 2, COLS / 2 - 14);
     printw("Press any key to go back...");
     getch();                                // wait user input
+    if(check_resize())                      // check if the window was resized by the user and re-enter the menu to re-draw everything
+        return 5;
     if(sound)                               // make ANNOYING sound if sound turned on
         beep();
     return 1;                               // return to Manage Databases Menu
@@ -559,8 +578,6 @@ int Menu::print_current_database(){
         printw("Terminal Database Manager");
         draw_line(decorator_type);
         refresh();
-        if(check_resize())                                          // check if the window was resized by the user and re-enter the menu to re-draw everything
-            return 1;
 
         vector<Object> current_database_objects = current_database.get_database_objects();
         
@@ -622,6 +639,8 @@ int Menu::print_current_database(){
         printw("4 - Back");
         
         int choice = getch(); // get user input
+        if(check_resize())    // check if the window was resized by the user and re-enter the menu to re-draw everything
+            return 6;
         if(sound)             // make ANNOYING sound if sound turned on
             beep();
 
@@ -640,22 +659,26 @@ int Menu::print_current_database(){
                         return 6;
                 }
             case 50:{                                                                                                                // 2 -> Add item to database
-                add_object_menu();                                                                                                   // call the function to add an object to the database
+                int status = add_object_menu();                                                                                      // call the function to add an object to the database
+                while(status == 0)
+                    status = add_object_menu();
                 current_database.save_database();
                 reload_database_vector();
                 return 6;
             }
             case 51:{                                                                                                                // 3 -> Delete item from database
                 int initial_size = current_database.get_number_of_objects();                                                         // get initial number of elements
-                bool is_confirmed = delete_object_menu();                                                                            // try to delete element(s) and get confirmation
-                if(is_confirmed){                                                                                                    // if confirmed
+                int status = delete_object_menu();                                                                                   // try to delete element(s) and get confirmation
+                if(status == 1)
+                    return 6;
+                if(status == 2){                                                                                                     // if confirmed
                     int final_size = current_database.get_number_of_objects();                                                       // get final number of elements
                     move(LINES - 2, 3);
                     printw("%d element(s) were deleted from the database! Press any key to continue...", initial_size - final_size); // and print the number of deleted elements
                     getch();                                                                                                         // wait user input before moving on
-                }else{
+                }else if(status == 0){
                     move(LINES - 2, 3);
-                    printw("No element was deleted from the database (ERROR)! Press any key to continue...");                        // otherwise, inform the user about the problem
+                    printw("No element was deleted from the database! Press any key to continue...");                        // otherwise, inform the user about the problem
                     getch();                                                                                                         // and wait for user input
                 }
                 current_database.save_database();                                                                                    // save database changes
@@ -692,7 +715,7 @@ int Menu::print_current_database(){
     return 3;                         // return to load database menu
 }
 
-void Menu::add_object_menu(){
+int Menu::add_object_menu(){
     while(true){
         // create the outline box using the preferred decorator, write the menu name and program title
         clear();
@@ -716,12 +739,12 @@ void Menu::add_object_menu(){
         draw_line(decorator_type);                                        // draw the bottom line
         move(LINES - 2, 3);
 
-        //TODO: ADD RESIZE!!!
-
         echo();                              // enable echo 
         nocbreak();                          // enable buffering
         char object[256];
         getnstr(object, sizeof(object) - 1); // get user input
+        if(check_resize())    // check if the window was resized by the user and re-enter the menu to re-draw everything
+            return 0;
         if(sound)                            // make ANNOYING sound if sound turned on
             beep();
         noecho();                            // no echo
@@ -751,6 +774,7 @@ void Menu::add_object_menu(){
             printw("Invalid object! Please make sure to follow the correct format!"); 
         }
     }
+    return 1;
 }
 
 int Menu::delete_object_menu(){
@@ -771,15 +795,15 @@ int Menu::delete_object_menu(){
     printw("All matching objects will be deleted!!!");
     move(13, 3);        
     printw("Press Enter to cancel and go back.");
-    // refresh();
-    //     if(check_resize())                             // check if the window was resized by the user and re-enter the menu to re-draw everything
-    //         return 1;
+    refresh();
     
     move(LINES - 2, 2);
     for(int i = 2; i < COLS - 1; i++)
         printw(" ");
     
     int choice = getch(); // get user input
+    if(check_resize())    // check if the window was resized by the user and re-enter the menu to re-draw everything
+        return 1;
     if(sound)             // make ANNOYING sound if sound turned on 
         beep();
 
@@ -793,13 +817,16 @@ int Menu::delete_object_menu(){
         move(LINES - 2, 3);
         printw("ID of the item to delete: ");
         refresh();
-        // if(check_resize())                                                   // check if the window was resized by the user and re-enter the menu to re-draw everything
-        //     return 1;
 
         echo();                                                                 // echo on
         nocbreak();                                                             // buffering on
         char id_to_delete[10];
         getnstr(id_to_delete, sizeof(id_to_delete));                            // get user input
+        if(check_resize()){                                                     // check if the window was resized by the user and re-enter the menu to re-draw everything
+            noecho();                                                           // no echo
+            cbreak();                                                           // no buffering
+            return 1;
+        }
         if(sound)                                                               // make ANNOYING sound if sound turned on   
             beep();
         noecho();                                                               // no echo
@@ -821,6 +848,11 @@ int Menu::delete_object_menu(){
         nocbreak();                                                             // buffering on
         char name_to_delete[255];
         getnstr(name_to_delete, sizeof(name_to_delete));                        // get user input
+        if(check_resize()){                                                     // check if the window was resized by the user and re-enter the menu to re-draw everything
+            noecho();                                                           // no echo
+            cbreak();                                                           // no buffering
+            return 1;
+        }
         if(sound)                                                               // make ANNOYING sound if sound turned on   
             beep();          
         noecho();                                                               // no echo
@@ -843,6 +875,11 @@ int Menu::delete_object_menu(){
         nocbreak();                                                             // buffering on
         char type_to_delete[255];
         getnstr(type_to_delete, sizeof(type_to_delete));                        // get user input
+        if(check_resize()){                                                     // check if the window was resized by the user and re-enter the menu to re-draw everything
+            noecho();                                                           // no echo
+            cbreak();                                                           // no buffering
+            return 1;
+        }
         if(sound)                                                               // make ANNOYING sound if sound turned on   
             beep();
         noecho();                                                               // no echo
@@ -852,7 +889,8 @@ int Menu::delete_object_menu(){
         string_to_find += type_to_delete;
 
         bool is_confirmed = current_database.delete_object(string_to_find);     // try to delete and get confirmation
-        return is_confirmed;                                                    // return the answer
+        if(is_confirmed)
+            return 2;                                                           // return confirmation
     }}
 
     return 0;
@@ -911,6 +949,8 @@ int Menu::settings(){
             return 7;
 
         int choice = getch(); // wait user input
+        if(check_resize())    // check if the window was resized by the user and re-enter the menu to re-draw everything
+            return 7;
         if(sound)             // make ANNOYING sound if sound turned on
             beep();
 
@@ -968,6 +1008,8 @@ int Menu::settings(){
             
 
             int decorator_choice = getch(); // get user input
+            if(check_resize())              // check if the window was resized by the user and re-enter the menu to re-draw everything
+            return 7;
             if(sound)                       // make ANNOYING sound if sound turned on
                 beep();
 
@@ -976,6 +1018,8 @@ int Menu::settings(){
 
             while(decorator_choice  != 49 && decorator_choice != 50 && decorator_choice != 51 && decorator_choice != 52){ // until the user pressed a valid key, keep them trapped in an infinite loop
                 decorator_choice = getch();                                                                               // wait user input
+                if(check_resize())                                                                                        // check if the window was resized by the user and re-enter the menu to re-draw everything
+                    return 7;
                 if(sound)                                                                                                 // make ANNOYING sound if sound turned on
                     beep();
 
@@ -1034,6 +1078,8 @@ int Menu::settings(){
                 printw("*");
 
             int text_choice = getch();                      // get user input
+            if(check_resize())                              // check if the window was resized by the user and re-enter the menu to re-draw everything
+            return 7;
             if(sound)                                       // make ANNOYING sound if sound turned on 
                 beep();
 
@@ -1042,6 +1088,8 @@ int Menu::settings(){
 
             while(text_choice  != 49 && text_choice != 50){ // until the user pressed a valid key, keep them trapped in an infinite loop
                 text_choice = getch();                      // wait user input
+                if(check_resize())                          // check if the window was resized by the user and re-enter the menu to re-draw everything
+                    return 7;
                 if(sound)                                   // make ANNOYING sound if sound turned on
                     beep();
 
@@ -1092,6 +1140,8 @@ int Menu::settings(){
                 printw("*");
 
             int sound_choice = getch();                       // get user input
+            if(check_resize())                                // check if the window was resized by the user and re-enter the menu to re-draw everything
+                return 7;
             if(sound)                                         // make ANNOYING sound if sound turned on
                 beep();
 
@@ -1100,6 +1150,8 @@ int Menu::settings(){
 
             while(sound_choice  != 49 && sound_choice != 50){ // until the user pressed a valid key, keep them trapped in an infinite loop
                 sound_choice = getch();                       // wait user input
+                if(check_resize())                            // check if the window was resized by the user and re-enter the menu to re-draw everything
+                    return 7;
                 if(sound)                                     // make ANNOYING sound if sound turned on
                     beep();
 
@@ -1159,6 +1211,8 @@ int Menu::settings(){
                 printw("*");
 
             int entries_choice = getch(); // get user input
+            if(check_resize())            // check if the window was resized by the user and re-enter the menu to re-draw everything
+                return 7;
             if(sound)                     // make ANNOYING sound if sound turned on 
                 beep();
 
@@ -1167,6 +1221,8 @@ int Menu::settings(){
 
             while(entries_choice  != 49 && entries_choice != 50 && entries_choice != 51){ // until the user pressed a valid key, keep them trapped in an infinite loop
                 entries_choice = getch();                                                 // wait user input
+                if(check_resize())                                                        // check if the window was resized by the user and re-enter the menu to re-draw everything
+                    return 7;
                 if(sound)                                                                 // make ANNOYING sound if sound turned on
                     beep();
 
@@ -1282,6 +1338,8 @@ int Menu::settings(){
                 printw("*");
 
             int continuous_choice = getch(); // get user input 
+            if(check_resize())               // check if the window was resized by the user and re-enter the menu to re-draw everything
+                return 7;
             if(sound)                        // make ANNOYING sound if sound turned on   
                 beep();
 
@@ -1290,6 +1348,8 @@ int Menu::settings(){
 
             while(continuous_choice  != 49 && continuous_choice != 50){ // until the user pressed a valid key, keep them trapped in an infinite loop
                 continuous_choice = getch();                            // wait user input
+                if(check_resize())                                      // check if the window was resized by the user and re-enter the menu to re-draw everything
+                    return 7;
                 if(sound)                                               // make ANNOYING sound if sound turned on 
                     beep();
 

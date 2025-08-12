@@ -1,0 +1,8 @@
+.vscode/
+build/
+src/files/
+index_manager.txt
+program_settings.txt
+TerminalDatabaseApp
+files/
+tests/

@@ -23,7 +23,7 @@ public:
     int delete_database();         // Delete Database Menu
     int print_databases();         // Print all available databases Menu
     int print_current_database();  // Print the current database and work on it
-    void add_object_menu();        // Add Object Menu
+    int add_object_menu();        // Add Object Menu
     int delete_object_menu();      // Delete Object Menu
     int settings();                // Settings Menu
 private:
