@@ -12,9 +12,9 @@
 #include <sstream>
 #include <vector>
 #include <fstream>
-#include <curses.h>
 #include <fstream>
 #include "../utils.h"
+#include <filesystem>
 
 class Database{
 public:

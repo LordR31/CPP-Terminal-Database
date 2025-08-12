@@ -55,7 +55,8 @@ string Database::save_objects_to_file(int index){
 bool Database::delete_database(){
     string database_path = "files/" + get_database_name() + ".txt";      // otherwise, craft the file path
     remove(database_path.c_str());                                              // and delete the file
-
+    if(filesystem::exists(database_path))
+        return false;
     return true;                                                                // return true (confirmation)
 }
 
@@ -105,8 +106,13 @@ bool Database::delete_object(int id_to_find){
             }
         };
 
+        int initial_size = database_objects.size();
         // check if the id from the user matches any id from the vector using that structure from above
         database_objects.erase(remove_if(database_objects.begin(), database_objects.end(), IsIdEqual(id_to_find)), database_objects.end());
+        int final_size = database_objects.size();
+        if(initial_size == final_size)
+            return false;
+
         return true;
 }
 
@@ -117,6 +123,7 @@ bool Database::delete_object(string string_to_find){
     
     string temp_string_to_find = string_to_find.substr(position + 1);
 
+    int initial_size = database_objects.size();
     switch (stoi(deletion_type)){
     case 0:
         struct IsNameEqual {                                          // create a structure to easily check if the name from the user matches the current object name being checked
@@ -142,6 +149,9 @@ bool Database::delete_object(string string_to_find){
         // check if the type from the user matches any type from the vector using that structure from above
         database_objects.erase(remove_if(database_objects.begin(), database_objects.end(), IsTypeEqual(temp_string_to_find)), database_objects.end());
     }
+    int final_size = database_objects.size();
+    if(initial_size == final_size)
+            return false;
 
     return true;
 }
