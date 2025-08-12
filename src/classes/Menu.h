@@ -10,19 +10,22 @@
 #include <filesystem>
 #include "Database.h"
 #include "../utils.h"
+#include <filesystem>
 
 class Menu{
 public:
     Menu();
 
-    int print_menu();             // Main Menu
-    int manage_database();        // Manage Databases Menu
-    int load_database();          // Load Database Menu
-    int create_database();        // Create Database Menu
-    int delete_database();        // Delete Database Menu
-    int print_databases();        // Print all available databases Menu
-    int print_current_database(); // Print the current database and work on it
-    int settings();               // Settings Menu
+    int print_menu();              // Main Menu
+    int manage_database();         // Manage Databases Menu
+    int load_database();           // Load Database Menu
+    int create_database();         // Create Database Menu
+    int delete_database();         // Delete Database Menu
+    int print_databases();         // Print all available databases Menu
+    int print_current_database();  // Print the current database and work on it
+    void add_object_menu();        // Add Object Menu
+    int delete_object_menu();      // Delete Object Menu
+    int settings();                // Settings Menu
 private:
     void save_settings();          // Save settings (to file)
     void reload_database_vector(); // Reload database vector

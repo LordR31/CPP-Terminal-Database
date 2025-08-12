@@ -104,8 +104,16 @@ Menu::Menu(){
         exit(0);
     }
     available_databases.close();
-}
 
+    string files_path = "files";
+    filesystem::path folderPath(files_path);
+
+    if(!filesystem::exists(folderPath))                      // check if files folder exists
+        if(!filesystem::create_directory(folderPath)){        // if not, try to create it
+            cout << "ERROR: Could not create files folder!"; // if not possible, cry error and exit
+            exit(0);
+        }
+}
 int Menu::print_menu(){
     while(true){
         // create the outline box using the preferred decorator, write the menu name and program title
@@ -316,10 +324,10 @@ int Menu::create_database(){
     noecho();                                          // no echo
     cbreak();                                          // no buffering
 
-    if(database_name[0] == '\0')                                              // if the user pressed Enter, go back 
+    if(database_name[0] == '\0')                                          // if the user pressed Enter, go back 
         return 1;
 
-    string database_path = "files/" + (string)database_name + ".txt";  // otherwise, create the path to the database 
+    string database_path = "files/" + (string)database_name + ".txt";     // otherwise, create the path to the database 
 
     ofstream output;                                                          
     output.open(database_path, ios::app);                                     // create the file OR open in append to prevent loss of data
@@ -329,7 +337,7 @@ int Menu::create_database(){
                                                                               // TODO: CHECK IF FILE ALREADY EXISTS AND WARN USER!!!
 
     ofstream index_manager;
-    index_manager.open("index_manager.txt", ios::app);                 // open index_manager to add the new database to "memory"
+    index_manager.open("index_manager.txt", ios::app);                        // open index_manager to add the new database to "memory"
     index_manager << current_database_index << "." << database_name << endl;  // add the database index and name
     index_manager.close();                                                    // close the file
 
@@ -398,7 +406,7 @@ int Menu::delete_database(){
     cbreak();                                  // disable buffering
 
     // determine the next step based on user input
-    if(choice_char[0] == '\0')                               // if the user pressed Enter, go back
+    if(choice_char[0] == '\0')                                                // if the user pressed Enter, go back
         return 1;
 
     int choice = stoi(choice_char);
@@ -409,8 +417,8 @@ int Menu::delete_database(){
         else
             move(LINES - 2, COLS / 2 - 29);
         printw("Invalid choice! Try entering a valid index. Select Index: "); // and warn him about it
-        choice = getch(); // get user input AGAIN
-        if(sound)         // make ANNOYING sound if sound turned on
+        choice = getch();                                                     // get user input AGAIN
+        if(sound)                                                             // make ANNOYING sound if sound turned on
             beep();
 
         if(choice > static_cast<int>(database_vector.size())){                // if the user pressed a number key, check if it was NOT a valid index AGAIN
@@ -425,20 +433,57 @@ int Menu::delete_database(){
         }
     }
 
-    int status = database_vector[choice].delete_database(decorator_type, sound);             // if the user DID input a valid index, load the Delete Database Menu for that specific database  
-    while(status != 0){                                                                      // until the deletion was confirmed or cancelled, keep re-entering that menu
-        if(status == 2){                                                                     // status = 2 -> Confirmation; status = 0 -> Cancelled
-            database_vector.erase(database_vector.begin() + (choice ));                      // when the deletion was confirmed, remove the database from the vector
+    // write the new info message to teach the user how to confirm deleting the database
+    move(LINES / 2 - 1, COLS / 2 - 22);
+    printw("Type DELETE to confirm deleting the database!");
+    move(LINES - 2, 3);
+    for(int i = 0; i < COLS - 4; i++)
+        printw(" ");
+    move(LINES - 2, 3);
+
+    //TODO: ADD RESIZE!!!
+
+    echo();                                      // echo on
+    nocbreak();                                  // buffering on
+    char confirmation[6];                        
+    getnstr(confirmation, sizeof(confirmation)); // get user input
+    if(sound)                                    // make ANNOYING sound if sound turned on
+        beep(); 
+    noecho();                                    // no echo
+    cbreak();                                    // no buffering
+
+    if(confirmation[0] == '\0')                  // if the user left blank and pressed Enter, go back
+        return 0;
+
+    int status = 1;
+    while(status == 1)
+        if(strcmp(confirmation, "DELETE") != 0){                                    // if the user unsuccessfully typed "DELETE"
+            move(LINES - 2, 3);
+            printw("Invalid Input! Do you want to try again? (Y / N): ");           // warn them and ask if they want to try again
+            int input = getch();
+            if(sound)
+                beep();
+
+            if(input == 121 || input == 89)      // lower and upper case y in ASCII
+                continue;                                                           // re-enter the menu
+            else if(input == 110 || input == 78) // lower and upper case n in ASCII
+                status = 0;
+        } else
+            status = 2;
+
+    if(status == 2){ 
+        bool is_confirmed = database_vector[choice].delete_database();                       // if the user DID successfully type "DELETE", delete the database file, BUT get confirmation
+        if(is_confirmed){
+            database_vector.erase(database_vector.begin() + (choice ));                      // remove the database from the vector
             current_database_index = database_vector.size();                                 // get the new current_database_index
-            ofstream index_manager("index_manager.txt");                              // rewrite index_manager
+            ofstream index_manager("index_manager.txt");                                     // rewrite index_manager
             for(int j = 0; j < static_cast<int>(database_vector.size()); j++) 
                 index_manager << j << '.' << database_vector[j].get_database_name() << '\n';
             index_manager.close();                                                           // close the file
             save_settings();                                                                 // save the settings
             reload_database_vector();                                                        // reload the database_vector to reflect the changes
-            break;                                                                           // exit the loop
-            }
-        status = database_vector[choice].delete_database(decorator_type, sound);             // re-enter the deletion menu (IF STATUS != 0 or 2)
+        } else
+            printw("ERROR: Failed to delete database!!!");                                   // tell the user there was an error and the database was NOT deleted
     }
 
     return 1;                                                                                // return to Manage Databases Menu
@@ -504,44 +549,313 @@ int Menu::print_databases(){
 }
 
 int Menu::print_current_database(){
-    // status: 0 - finished; 1 - previous page; 2 - next page;
-    int status = current_database.print_database(decorator_type, number_of_entries, current_database_page_number, sound); // get status
-    while(true){                                                                                                          // and until explicit exit
-        switch (status){                                                                                                  // keep deciding the next step 
-        case 0:                                
-            current_database.save_database(); // save database changes
-            reload_database_vector();         // reload the database_vector;
-            return 3;                         // return to Load Database Menu
-            break;                            // exit the loop
-        case 1:                                                                                                               // Manage previous page depending on Continuous Mode
-            if(continuous_mode)                                                                                               // if on
-                if(current_database_page_number == 0)                                                                         // if on page 0
-                    current_database_page_number = current_database.get_number_of_objects() / number_of_entries;              // go to last page
-                else
-                    current_database_page_number--;                                                                           // otherwise just decrement the page number
-            else          
-                if(current_database_page_number > 0)                                                                          // if NOT on page 0
-                    current_database_page_number --;                                                                          // go to the previous page
+    while(true){
+        // create the outline box using the preferred decorator, write the menu name and program title
+        clear();
+        draw_main_box(decorator_type);
+        move(1, 3);
+        printw("%s", current_database.get_database_name().c_str());
+        move(1, COLS - 28);
+        printw("Terminal Database Manager");
+        draw_line(decorator_type);
+        refresh();
+        if(check_resize())                                          // check if the window was resized by the user and re-enter the menu to re-draw everything
+            return 1;
 
-            status = current_database.print_database(decorator_type, number_of_entries, current_database_page_number, sound); // re-enter the menu get status
-            continue;
-        case 2:                                                                                                               // Manage next page depending on Continuous Mode
-            if(continuous_mode)                                                                                               // if on                       
-                if(current_database_page_number == current_database.get_number_of_objects() / number_of_entries)              // if on the last page
-                    current_database_page_number = 0;                                                                         // go to page 0
-                else
-                    current_database_page_number++;                                                                           // otherwise just increment the page number
-            else                                                                                      
-                if(current_database_page_number < current_database.get_number_of_objects() / number_of_entries)               // if NOT on the last page
-                    current_database_page_number ++;                                                                          // go to next page
+        vector<Object> current_database_objects = current_database.get_database_objects();
+        
+        bool is_empty = false;
+        bool is_paged = false;
+        if (current_database_objects.empty()){                                        // check if the database is empty
+            move(8, COLS / 2 - 25);
+            printw("Database is empty. No objects to display.");                      // and tell the user there's nothing to display
+            is_empty = true;
+        }else{
+            if(static_cast<int>(current_database_objects.size()) > number_of_entries) // if there IS something to display, check if you need pages
+                is_paged = true;
 
-            status = current_database.print_database(decorator_type, number_of_entries, current_database_page_number, sound); // re-enter the menu and get status                                                                                                             
-            continue;
+                                                                              // and write out the database structure
+            move(LINES - 4 - number_of_entries - 1, 3);
+            printw("ID");                                                     // ID
+            move(LINES - 4 - number_of_entries - 1, 8);
+            printw("Name");                                                   //     Name
+            move(LINES - 4 - number_of_entries - 1, COLS - 10 - 50);
+            printw("Type");                                                   //                                   Type
+            move(LINES - 4 - number_of_entries - 1, COLS - 10);
+            printw("Quantity");                                               //                                                               Quantity
+
+            string page_number_string = "Page " + to_string(current_database_page_number); // Print the page number
+            move(LINES / 2, COLS / 2 - page_number_string.length() / 2);
+            printw("%s", page_number_string.c_str());
+
+            for(int i = 0; i < number_of_entries; i++){                                    // and then print the objects, as many on a page as selected by the user (number_of_entries)
+                if(i + current_database_page_number * number_of_entries < static_cast<int>(current_database_objects.size())){
+                    move(LINES - 4 - i, 3);
+                    printw("%d",current_database_objects[i + current_database_page_number * number_of_entries].get_id());
+                    move(LINES - 4 - i, 8);
+                    printw("%s",current_database_objects[i + current_database_page_number * number_of_entries].get_name().c_str());
+                    move(LINES - 4 - i, COLS - 10 - 50);
+                    printw("%s", current_database_objects[i + current_database_page_number * number_of_entries].get_type().c_str());
+                    move(LINES - 4 - i, COLS - 5 - to_string(current_database_objects[i + current_database_page_number * number_of_entries].get_quantity()).length() / 2 - 1);
+                    printw("%d", current_database_objects[i + current_database_page_number * number_of_entries].get_quantity());
+                    refresh();
+                }
+            }
+        }
+
+        // write out the menu options
+        if(is_paged){                                 // if there ARE pages, show the page buttons
+            move(LINES - 2, 2);
+            printw("1 - Previous Page");
+            move(LINES - 2, COLS - 15);
+            printw("5 - Next Page");
+        }
+        if(!is_empty){                                // if it's NOT empty, show the delete button
+            move(LINES - 2, COLS - 15 - 14 - 8 - 15);
+            printw("3 - Delete item");
+        }
+
+        move(LINES - 2, COLS - 15 - 21 - 8 - 15 - 15);
+        printw("2 - Add item");                      
+        
+        move(LINES - 2, COLS - 15 - 7 - 8);
+        printw("4 - Back");
+        
+        int choice = getch(); // get user input
+        if(sound)             // make ANNOYING sound if sound turned on
+            beep();
+
+        // determine the next step based on user input
+        while(true)
+        switch (choice){
+            case 49: {                                                                                                               // 1 -> Previous page
+                if(is_paged){                                                                                                        // if the button is shown (there are pages)
+                    if(continuous_mode){                                                                                                // if Continuous Mode on
+                        if(current_database_page_number == 0){                                                                             // if on page 0
+                            current_database_page_number = current_database.get_number_of_objects() / number_of_entries;                      // go to last page
+                        }else{current_database_page_number--;}                                                                             // otherwise just decrement the page number
+                    }else if(current_database_page_number > 0){                                                                         // othetwise, if NOT on page 0
+                            current_database_page_number --;                                                                               // go to the previous page
+                    }}else                                                                                                           // otherwise just ignore the input
+                        return 6;
+                }
+            case 50:{                                                                                                                // 2 -> Add item to database
+                add_object_menu();                                                                                                   // call the function to add an object to the database
+                current_database.save_database();
+                reload_database_vector();
+                return 6;
+            }
+            case 51:{                                                                                                                // 3 -> Delete item from database
+                int initial_size = current_database.get_number_of_objects();                                                         // get initial number of elements
+                bool is_confirmed = delete_object_menu();                                                                            // try to delete element(s) and get confirmation
+                if(is_confirmed){                                                                                                    // if confirmed
+                    int final_size = current_database.get_number_of_objects();                                                       // get final number of elements
+                    move(LINES - 2, 3);
+                    printw("%d element(s) were deleted from the database! Press any key to continue...", initial_size - final_size); // and print the number of deleted elements
+                    getch();                                                                                                         // wait user input before moving on
+                }else{
+                    move(LINES - 2, 3);
+                    printw("No element was deleted from the database (ERROR)! Press any key to continue...");                        // otherwise, inform the user about the problem
+                    getch();                                                                                                         // and wait for user input
+                }
+                current_database.save_database();                                                                                    // save database changes
+                reload_database_vector();                                                                                            // and reload the vector
+                return 6;
+            }
+            case 52:{                                                                                                                // 4 -> Back
+                return 3;                                                                                                            // exit loop to return to Load Database Menu
+            }
+
+                                                                                                                                    // TODO: Add Find & Edit button
+                                                                                                                                    // TODO: Add number of elements counter to screen
+                                                                                                                                    // TODO: Add number of pages to screen:    Page X/XX
+
+            case 53:{                                                                                                               // 5 -> Next page
+                if(is_paged){                                                                                                       // if the button is shown (there are pages)            
+                    if(continuous_mode){                                                                                               // if Continuous Mode on                       
+                        if(current_database_page_number == current_database.get_number_of_objects() / number_of_entries){                 // if on the last page
+                            current_database_page_number = 0;                                                                                // go to page 0
+                        }else{current_database_page_number++;}                                                                            // otherwise just increment the page number
+                    }else if(current_database_page_number < current_database.get_number_of_objects() / number_of_entries){             // oterwise, if NOT on the last page
+                        current_database_page_number ++;                                                                                  // go to next page
+                    }}else         
+                        return 6;                                                                                                   // otherwise just ignore this input
+            }
+            default:{                                                                                                               // ignore other inputs
+                continue;
+            }    
         }
     }
+
     current_database.save_database(); // save database changes
     reload_database_vector();         // reload the database vector
     return 3;                         // return to load database menu
+}
+
+void Menu::add_object_menu(){
+    while(true){
+        // create the outline box using the preferred decorator, write the menu name and program title
+        clear();
+        draw_main_box(decorator_type);
+        move(1,3);
+        printw("Add Object");
+        move(1, COLS - 28);
+        printw("Terminal Database Manager");
+        move(LINES / 2 - 4, COLS / 2 - 23);
+
+        // inform the user as to how to create new objects
+        printw( "Objects are created using the following format:");
+        move(LINES / 2 - 5, COLS - 30);
+        printw( "**********************");
+        move(LINES / 2 - 4, COLS - 28);
+        printw( "name type quantity");
+        move(LINES / 2 - 3, COLS - 30);
+        printw( "**********************");
+        move(LINES - 4, 3);
+        printw("Leave blank and press Enter to cancel and go back");
+        draw_line(decorator_type);                                        // draw the bottom line
+        move(LINES - 2, 3);
+
+        //TODO: ADD RESIZE!!!
+
+        echo();                              // enable echo 
+        nocbreak();                          // enable buffering
+        char object[256];
+        getnstr(object, sizeof(object) - 1); // get user input
+        if(sound)                            // make ANNOYING sound if sound turned on
+            beep();
+        noecho();                            // no echo
+        cbreak();                            // no buffering
+            
+        string object_string = object;       // make the input a string  
+        if(object[0] == '\0')                // if the user left blank and pressed Enter, go back
+            break;
+
+        stringstream new_object(object_string);
+        vector<string> temp_object;
+        string temp_object_feature;
+
+        while(getline(new_object, temp_object_feature, ' '))                          // so long as there are features to remove from that input line
+            temp_object.push_back(temp_object_feature);                               // extract them into a vector
+ 
+        try{                                                                          // then try to create an object with them
+            string temp_name = temp_object[0];
+            string temp_type = temp_object[1];
+            int temp_quantity = std::stoi(temp_object[2]);
+
+            current_database.add_object(temp_name, temp_type, temp_quantity);         // and add it to the database object vector
+
+            printw("Object added to the database!");                                  // finally tell the user that the object was added to the database (never really shown cuz no getch() to pause)
+            break;
+        }catch(int errorCode){                                                        // if not possible, tell the user to carefully follow the format
+            printw("Invalid object! Please make sure to follow the correct format!"); 
+        }
+    }
+}
+
+int Menu::delete_object_menu(){
+    // print on top of the database menu
+    move(3,3);
+    printw("Delete by...");
+    move(1, COLS - 28);
+    printw("Terminal Database Manager");
+    move(5, 3);
+    printw("1. ID");
+    move(6, 3);
+    printw("2. Name");
+    move(7, 3);
+    printw("3. Type");
+    move(10, 3);
+    printw("WARNING!!!");
+    move(11, 3);
+    printw("All matching objects will be deleted!!!");
+    move(13, 3);        
+    printw("Press Enter to cancel and go back.");
+    // refresh();
+    //     if(check_resize())                             // check if the window was resized by the user and re-enter the menu to re-draw everything
+    //         return 1;
+    
+    move(LINES - 2, 2);
+    for(int i = 2; i < COLS - 1; i++)
+        printw(" ");
+    
+    int choice = getch(); // get user input
+    if(sound)             // make ANNOYING sound if sound turned on 
+        beep();
+
+    if(choice == 10)      // if the user pressed Enter, go back
+        return 0;
+
+    switch(choice){
+    case 49:{                                                                   // 1 -> delete objects by id
+        move(3,3);
+        printw("Delete by ID");
+        move(LINES - 2, 3);
+        printw("ID of the item to delete: ");
+        refresh();
+        // if(check_resize())                                                   // check if the window was resized by the user and re-enter the menu to re-draw everything
+        //     return 1;
+
+        echo();                                                                 // echo on
+        nocbreak();                                                             // buffering on
+        char id_to_delete[10];
+        getnstr(id_to_delete, sizeof(id_to_delete));                            // get user input
+        if(sound)                                                               // make ANNOYING sound if sound turned on   
+            beep();
+        noecho();                                                               // no echo
+        cbreak();                                                               // no buffering
+
+        if(id_to_delete[0] == '\0')                                             // if the user left blank and pressed Enter, go back
+            return 0;
+
+        bool is_confirmed = current_database.delete_object(stoi(id_to_delete)); // try to delete element and get confirmation
+        return is_confirmed;                                                    // return the answser
+    }
+    case 50:{                                                                   // 2 -> delete objects by name
+        move(1,3);
+        printw("Delete by Name");
+        move(LINES - 2, 3);
+        printw("Name of the item to delete: ");
+
+        echo();                                                                 // echo on
+        nocbreak();                                                             // buffering on
+        char name_to_delete[255];
+        getnstr(name_to_delete, sizeof(name_to_delete));                        // get user input
+        if(sound)                                                               // make ANNOYING sound if sound turned on   
+            beep();          
+        noecho();                                                               // no echo
+        cbreak();                                                               // no buffering
+
+
+        string string_to_find = "0.";
+        string_to_find += name_to_delete;
+
+        bool is_confirmed = current_database.delete_object(string_to_find);
+        return is_confirmed;
+    }
+    case 51:{                                                                   // 3 -> delete objects by type
+        move(1,3);
+        printw("Delete by Type");
+        move(LINES - 2, 3);
+        printw("Type of the item to delete: ");
+
+        echo();                                                                 // echo on
+        nocbreak();                                                             // buffering on
+        char type_to_delete[255];
+        getnstr(type_to_delete, sizeof(type_to_delete));                        // get user input
+        if(sound)                                                               // make ANNOYING sound if sound turned on   
+            beep();
+        noecho();                                                               // no echo
+        cbreak();                                                               // no buffering
+
+        string string_to_find = "1.";
+        string_to_find += type_to_delete;
+
+        bool is_confirmed = current_database.delete_object(string_to_find);     // try to delete and get confirmation
+        return is_confirmed;                                                    // return the answer
+    }}
+
+    return 0;
 }
 
 int Menu::settings(){
