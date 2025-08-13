@@ -25,7 +25,7 @@ This will create the app executable in the root folder. From here, simply go out
 
 `./TerminalDatabaseApp`
 
-## Compilation on Window
+## Compilation on Windows
 
 To compile on Windows, the user *MUST* install Visual Studio build tools for C++ development. 
 
