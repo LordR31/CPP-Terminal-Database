@@ -114,6 +114,7 @@ Menu::Menu(){
             exit(0);
         }
 }
+
 int Menu::print_menu(){
     while(true){
         // create the outline box using the preferred decorator, write the menu name and program title
@@ -395,7 +396,6 @@ int Menu::delete_database(){
             move(LINES - 2, COLS / 2 - 8);
     printw("Select database: ");
 
-
     echo();                                    // enable echo 
     nocbreak();                                // enable buffering
     char choice_char[2];
@@ -407,8 +407,8 @@ int Menu::delete_database(){
     }
     if(sound)                                  // make ANNOYING sound if sound turned on
         beep();
-    noecho();                                  // disable echo
-    cbreak();                                  // disable buffering
+    noecho();                                                         // disable echo
+    cbreak();                                                         // disable buffering
 
     // determine the next step based on user input
     if(choice_char[0] == '\0')                                                // if the user pressed Enter, go back
@@ -422,7 +422,9 @@ int Menu::delete_database(){
         else
             move(LINES - 2, COLS / 2 - 29);
         printw("Invalid choice! Try entering a valid index. Select Index: "); // and warn him about it
-        choice = getch();                                                     // get user input AGAIN
+        echo();                                                               // enable echo 
+        nocbreak();                                                           // enable buffering
+        getnstr(choice_char, sizeof(choice_char));                            // get user input again
         if(check_resize()){                                                   // check if the window was resized by the user and re-enter the menu to re-draw everything
             noecho();                                                         // disable echo
             cbreak();                                                         // disable buffering
@@ -438,73 +440,86 @@ int Menu::delete_database(){
                 move(LINES - 2, 3);
             else
                 move(LINES - 2, COLS / 2 - 20);
-            printw("There have been too many invalid choices!");              // tell him he/she had his/her chance and go back, because deleting a database is serious bussiness
-            for(int j = 44; j < COLS; j++)
+            printw("There have been too many invalid choices! Press any key to continue and go back..."); // tell him he/she had his/her chance and go back, because deleting a database is serious bussiness
+            for(int j = 85; j < COLS; j++)
                 printw(" ");
+            getch();
             return 1;
         }
     }
-
     // write the new info message to teach the user how to confirm deleting the database
     move(LINES / 2 - 1, COLS / 2 - 22);
     printw("Type DELETE to confirm deleting the database!");
-    move(LINES - 2, 3);
-    for(int i = 0; i < COLS - 4; i++)
-        printw(" ");
-    move(LINES - 2, 3);
+    move(LINES / 2, COLS / 2 - 24);
+    printw("Leave blank and press Enter to cancel and go back");
+    while(true){
+        move(LINES - 2, 3);
+        for(int i = 0; i < COLS - 4; i++)
+            printw(" ");
+        move(LINES - 2, 3);
 
-    //TODO: ADD RESIZE!!!
+        //TODO: ADD RESIZE!!!
 
-    echo();                                      // echo on
-    nocbreak();                                  // buffering on
-    char confirmation[6];                        
-    getnstr(confirmation, sizeof(confirmation)); // get user input
-    if(check_resize()){                          // check if the window was resized by the user and re-enter the menu to re-draw everything
-            noecho();                            // disable echo
-            cbreak();                            // disable buffering
-            return 4;
-    }
-    if(sound)                                    // make ANNOYING sound if sound turned on
-        beep(); 
-    noecho();                                    // no echo
-    cbreak();                                    // no buffering
-
-    if(confirmation[0] == '\0')                  // if the user left blank and pressed Enter, go back
-        return 0;
-
-    int status = 1;
-    while(status == 1)
-        if(strcmp(confirmation, "DELETE") != 0){                                    // if the user unsuccessfully typed "DELETE"
-            move(LINES - 2, 3);
-            printw("Invalid Input! Do you want to try again? (Y / N): ");           // warn them and ask if they want to try again
-            int input = getch();
-            if(check_resize())                                                      // check if the window was resized by the user and re-enter the menu to re-draw everything
+        echo();                                      // echo on
+        nocbreak();                                  // buffering on
+        char confirmation[7];                        
+        getnstr(confirmation, sizeof(confirmation) - 1); // get user input
+        if(check_resize()){                          // check if the window was resized by the user and re-enter the menu to re-draw everything
+                noecho();                            // disable echo
+                cbreak();                            // disable buffering
                 return 4;
-            if(sound)
-                beep();
+        }
+        if(sound)                                    // make ANNOYING sound if sound turned on
+            beep(); 
+        noecho();                                    // no echo
+        cbreak();                                    // no buffering
 
-            if(input == 121 || input == 89)      // lower and upper case y in ASCII
-                continue;                                                           // re-enter the menu
-            else if(input == 110 || input == 78) // lower and upper case n in ASCII
-                status = 0;
-        } else
-            status = 2;
+        if(confirmation[0] == '\0')                  // if the user left blank and pressed Enter, go back
+            return 0;
 
-    if(status == 2){ 
-        bool is_confirmed = database_vector[choice].delete_database();                       // if the user DID successfully type "DELETE", delete the database file, BUT get confirmation
-        if(is_confirmed){
-            database_vector.erase(database_vector.begin() + (choice ));                      // remove the database from the vector
-            current_database_index = database_vector.size();                                 // get the new current_database_index
-            ofstream index_manager("index_manager.txt");                                     // rewrite index_manager
-            for(int j = 0; j < static_cast<int>(database_vector.size()); j++) 
-                index_manager << j << '.' << database_vector[j].get_database_name() << '\n';
-            index_manager.close();                                                           // close the file
-            save_settings();                                                                 // save the settings
-            reload_database_vector();                                                        // reload the database_vector to reflect the changes
-        } else
-            printw("ERROR: Failed to delete database!!!");                                   // tell the user there was an error and the database was NOT deleted
+        int status = 1;
+        while(status == 1)
+            if(strcmp(confirmation, "DELETE") != 0){                                    // if the user unsuccessfully typed "DELETE"
+                move(LINES - 2, 3);
+                printw("Invalid Input! Do you want to try again? (Y / N): ");           // warn them and ask if they want to try again
+                int input = getch();
+                if(check_resize())                                                      // check if the window was resized by the user and re-enter the menu to re-draw everything
+                    return 4;
+                if(sound)
+                    beep();
+
+                if(confirmation[0] == '\0')
+                    status = 0;
+
+                if(input == 121 || input == 89)       // lower and upper case y in ASCII
+                    break;                            // break this loop and try again
+
+                else if(input == 110 || input == 78){ // lower and upper case n in ASCII
+                    status = 0;
+                }
+            }else
+                status = 2;
+
+        if(status == 2){ 
+            bool is_confirmed = database_vector[choice].delete_database();                       // if the user DID successfully type "DELETE", delete the database file, BUT get confirmation
+            if(is_confirmed){
+                database_vector.erase(database_vector.begin() + (choice ));                      // remove the database from the vector
+                current_database_index = database_vector.size();                                 // get the new current_database_index
+                ofstream index_manager("index_manager.txt");                                     // rewrite index_manager
+                for(int j = 0; j < static_cast<int>(database_vector.size()); j++) 
+                    index_manager << j << '.' << database_vector[j].get_database_name() << '\n';
+                index_manager.close();                                                           // close the file
+                reload_database_vector();                                                        // reload the database_vector to reflect the changes
+                move(LINES - 2, 3);
+                printw("Database deleted! Press any key to continue...");
+                getch();
+                return 1;
+            }}else{
+                printw("Operation canceled! Press any key to continue...");                      // tell the user there was an error and the database was NOT deleted
+                getch();
+                return 1;
+            }
     }
-
     return 1;                                                                                // return to Manage Databases Menu
 }
 
@@ -645,7 +660,6 @@ int Menu::print_current_database(){
             beep();
 
         // determine the next step based on user input
-        while(true)
         switch (choice){
             case 49: {                                                                                                               // 1 -> Previous page
                 if(is_paged){                                                                                                        // if the button is shown (there are pages)
@@ -655,8 +669,9 @@ int Menu::print_current_database(){
                         }else{current_database_page_number--;}                                                                             // otherwise just decrement the page number
                     }else if(current_database_page_number > 0){                                                                         // othetwise, if NOT on page 0
                             current_database_page_number --;                                                                               // go to the previous page
-                    }}else                                                                                                           // otherwise just ignore the input
+                    }}else                                                                                                          // otherwise just ignore the input
                         return 6;
+                break;
                 }
             case 50:{                                                                                                                // 2 -> Add item to database
                 int status = add_object_menu();                                                                                      // call the function to add an object to the database
@@ -703,9 +718,10 @@ int Menu::print_current_database(){
                         current_database_page_number ++;                                                                                  // go to next page
                     }}else         
                         return 6;                                                                                                   // otherwise just ignore this input
+                break;
             }
             default:{                                                                                                               // ignore other inputs
-                continue;
+                return 6;
             }    
         }
     }
@@ -1376,8 +1392,6 @@ int Menu::settings(){
 }
 
 void Menu::save_settings(){
-    printw("Saving...");
-
     ofstream save_settings("program_settings.txt");                        // open program_settings
 
     // write the settings as chosen by user
@@ -1401,7 +1415,7 @@ void Menu::save_settings(){
     save_settings << "Number_of_entries="      << number_of_entries      << endl;
  // save_settings << "Compact_mode="           << compact_mode           << endl;
     save_settings << "Continuous_mode="        << continuous_mode        << endl;
-
+    move(LINES - 2, 3);
     printw("Settings saved!");
     save_settings.close();                                                        // close the file
 }

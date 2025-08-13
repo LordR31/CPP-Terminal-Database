@@ -5,3 +5,6 @@ index_manager.txt
 program_settings.txt
 TerminalDatabaseApp
 files/
+TerminalDatabaseApp.pdb
+TerminalDatabaseApp.exe
+pdcurses.dll
