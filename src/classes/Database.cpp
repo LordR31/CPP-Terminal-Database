@@ -27,6 +27,10 @@ int Database::get_next_object_id(){
     return next_object_id;
 }
 
+void Database::set_database_name(const string& new_name){
+    database_name = new_name;
+}
+
 void Database::load_database(const string& database_identifiers){ 
     int pos = database_identifiers.find('.');                // find the . separating id from name
     database_id = stoi(database_identifiers.substr(0, pos)); // extract id

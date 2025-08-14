@@ -26,9 +26,9 @@ public:
     Menu();
 
     int main_menu();             // Main Menu
-    int manage_database_menu();  // Manage Databases Menu
+    int manage_databases_menu();  // Manage Databases Menu
     int load_database_menu();    // Load Database Menu
-    int create_database();       // Create Database Menu
+    int create_database_menu();       // Create Database Menu
     int delete_database_menu();  // Delete Database Menu
     int available_databases_menu();       // Print all available databases Menu
     int current_database_menu(); // Current Database Menu
@@ -39,19 +39,21 @@ private:
 
     void print_main_menu();        // Print Main Menu
     
-    void print_manage_database();  // Print Manage Databases Menu
+    void print_manage_databases_menu();  // Print Manage Databases Menu
     
-    // Load Database Menu
+    // Manage Database Menu
     void print_load_database(bool is_empty, bool is_paged); // Print Load Database Menu
     void print_choose_database();
     void print_found_databases(std::vector<Database> found_databases);
     void print_find_menu();
     void print_search_word(const std::string& search_word);
     void print_load_database_options(bool is_paged);
-    
+    void print_edit_database_menu();
+    void print_edit_database_name();
+
     // Available Databases Menu
     void print_available_databases_menu(bool is_empty, bool is_paged);
-    void print_databases_options(bool is_paged);
+    void print_databases_options(bool is_empty, bool is_paged);
 
     // Delete Database Menu
     bool delete_database();
@@ -90,8 +92,9 @@ private:
     void clear_user_input_zone();
     void clear_search_results();
     bool choose_database();
-    std::vector<Database> match_word(const std::string& input_word);
+    bool edit_database();
     void find_database();
+    std::vector<Database> match_word(const std::string& input_word);
     void update_index_manager();
 
     void print_invalid_input();

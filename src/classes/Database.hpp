@@ -26,6 +26,8 @@ public:
     std::vector<Object> get_database_objects();                        // Prints the database
     int get_next_object_id();
     
+    void set_database_name(const std::string& new_name);
+
     void load_database(const std::string& database_identifiers);       // Loads database identifiers & objects from file
     void save_database();                                              // Saved database to file
     bool delete_database();                                            // Deletes the database & file
