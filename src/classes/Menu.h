@@ -29,15 +29,16 @@ public:
 private:
     void save_settings();          // Save settings (to file)
     void reload_database_vector(); // Reload database vector
-    
+    std::vector<Database> match_word(const std::string& input_word);
+    void print_found_databases(std::vector<Database> found_databases);
     // VARIABLES, OBJECTS AND VECTORS
 
-                                           // Holds the available databases
-    std::vector<Database> database_vector; // cppcheck-suppress unusedStructMember
-    Database current_database;             // currently active database that can be worked on
-    int current_database_index = 0;        // index used when creating a new database
-    int current_database_page_number = 0;  // currently active page which is displayed
-
+                                                    // holds the available databases
+    std::vector<Database> database_vector;          // cppcheck-suppress unusedStructMember
+    Database current_database;                      // currently active database that can be worked on
+    int current_database_index = 0;                 // index used when creating a new database
+    int current_database_page_number = 0;           // currently active page which is displayed
+    int all_database_page_number = 0;               // page number used in print_databases(), load_database() & delete_database()
     // SETINGS
 
     char decorator_type = '*';            // Decorator type used for drawing     
