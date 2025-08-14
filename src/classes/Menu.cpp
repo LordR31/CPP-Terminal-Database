@@ -1,5 +1,5 @@
 // Menu.cpp
-#include "Menu.h" // Include the corresponding header file
+#include "Menu.hpp" // Include the corresponding header file
 
 using namespace std;
 
@@ -115,35 +115,51 @@ Menu::Menu(){
         }
 }
 
-int Menu::print_menu(){
-    while(true){
-        // create the outline box using the preferred decorator, write the menu name and program title
-        clear();
-        draw_main_box(decorator_type);
-        move(1,3);
-        printw("Main Menu");
-        move(1,COLS - 28);
-        printw("Terminal Database Manager");
+void Menu::print_program_tittle(){
+    move(1,PROGRAM_TITTLE_COLUMN_POSTION);
+    printw("Terminal Database Manager");
+}
 
-        // write out the menu options
-        if(text_position == 1)               // check if text should be left side aligned or centered and write accordingly
-            move(LINES - 6,3);
-        else
-            move(LINES - 6, COLS / 2 - 9);
-        printw("1. Manage Databases");
-        if(text_position == 1)               // check if text should be left side aligned or centered and write accordingly
-            move(LINES - 5,3);
-        else
-            move(LINES - 5, COLS / 2 - 5);
-        printw("2. Settings");
-        if(text_position == 1)               // check if text should be left side aligned or centered and write accordingly
-            move(LINES - 4,3);
-        else
-            move(LINES - 4, COLS / 2 - 7);
-        printw("3. Quit Program");
-        draw_line(decorator_type);           // draw the bottom line
-        refresh();
-        if(check_resize())                   // check if the window was resized by the user and re-enter the menu to re-draw everything
+void Menu::print_main_menu(){
+    // create the outline box using the preferred decorator, write the menu name and program title
+    clear();
+    draw_main_box(decorator_type);
+    move(MENU_TITTLE_LINE_POSITION, LINE_TEXT_START_POSITION);
+    printw("Main Menu");
+    print_program_tittle();
+    
+    string temp_string = "1. Manage Databases";
+    // write out the menu options
+    if(text_position == 1)               // check if text should be left side aligned or centered and write accordingly
+        move(AVAILABLE_OPTIONS_START_LINE - 2, LINE_TEXT_START_POSITION);
+    else
+        move(AVAILABLE_OPTIONS_START_LINE - 2, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+    printw("%s", temp_string.c_str());
+
+    temp_string.clear();
+    temp_string = "2. Settings";
+    if(text_position == 1)               // check if text should be left side aligned or centered and write accordingly
+        move(AVAILABLE_OPTIONS_START_LINE - 1, LINE_TEXT_START_POSITION);
+    else
+        move(AVAILABLE_OPTIONS_START_LINE - 1, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+    printw("%s", temp_string.c_str());
+
+    temp_string.clear();
+    temp_string = "3. Quit Program";
+    if(text_position == 1)               // check if text should be left side aligned or centered and write accordingly
+        move(AVAILABLE_OPTIONS_START_LINE, LINE_TEXT_START_POSITION);
+    else
+        move(AVAILABLE_OPTIONS_START_LINE, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+    printw("%s", temp_string.c_str());
+
+    draw_line(decorator_type);           // draw the bottom line
+    refresh();
+}
+
+int Menu::main_menu(){
+    print_main_menu();
+    while(true){
+        if(check_resize())     // check if the window was resized by the user and re-enter the menu to re-draw everything
             return 0;
 
         int choice = getch();  // get user input
@@ -159,54 +175,68 @@ int Menu::print_menu(){
             return 7;
             break;
         case 51: // 3 in ASCII    Exit program!
-            endwin();
-            exit(0);
-            break;
+            return 20;
         default:
             break;
         }
     }
 }
 
-int Menu::manage_database(){
-    all_database_page_number = 0; // reset all_database_page_number
-    while(true){
-        // create the outline box using the preferred decorator, write the menu name and program title
-        clear(); 
-        draw_main_box(decorator_type); 
-        move(1,3);
-        printw("Manage Databases");
-        move(1, COLS - 28);
-        printw("Terminal Database Manager");
+void Menu::print_manage_database(){
+    // create the outline box using the preferred decorator, write the menu name and program title
+    clear(); 
+    draw_main_box(decorator_type); 
+    move(MENU_TITTLE_LINE_POSITION, LINE_TEXT_START_POSITION);
+    printw("Manage Databases");
+    print_program_tittle();
+    
+    // write out the menu options
+    string temp_string = "1. Create database";
+    if(text_position == 1)                         // check if text should be left side aligned or centered and write accordingly
+       move(AVAILABLE_OPTIONS_START_LINE - 3, LINE_TEXT_START_POSITION);
+    else
+       move(AVAILABLE_OPTIONS_START_LINE - 3, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+    printw("%s", temp_string.c_str());
 
-        // write out the menu options
-        if(text_position == 1)                         // check if text should be left side aligned or centered and write accordingly
-            move(LINES - 7, 3);
-        else
-            move(LINES - 7, COLS / 2 - 9);
-        printw("1. Create database");
-        if(text_position == 1)                         // check if text should be left side aligned or centered and write accordingly
-            move(LINES - 6, 3);
-        else
-            move(LINES - 6, COLS / 2 - 8);
-        printw("2. Load database");
-        if(text_position == 1)                         // check if text should be left side aligned or centered and write accordingly
-            move(LINES - 5, 3);
-        else
-            move(LINES - 5, COLS / 2 - 9);
-        printw("3. Delete database");
-        if(text_position == 1)                         // check if text should be left side aligned or centered and write accordingly
-            move(LINES - 4, 3);
-        else
-            move(LINES - 4, COLS / 2 - 14);
-        printw("4. Print available databases");
-        draw_line(decorator_type);                     // draw the bottom line
-        if(text_position == 1)                         // check if text should be left side aligned or centered and write accordingly
-            move(LINES - 2, 3);
-        else
-            move(LINES - 2, COLS / 2 - 17);
-        printw("Press Enter to go back to main menu");
-        refresh();
+    temp_string.clear();
+    temp_string = "2. Load database";
+    if(text_position == 1)                         // check if text should be left side aligned or centered and write accordingly
+       move(AVAILABLE_OPTIONS_START_LINE - 2, LINE_TEXT_START_POSITION);
+    else
+       move(AVAILABLE_OPTIONS_START_LINE - 2, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+    printw("%s", temp_string.c_str());
+
+    temp_string.clear();
+    temp_string = "3. Delete database";
+    if(text_position == 1)                         // check if text should be left side aligned or centered and write accordingly
+        move(AVAILABLE_OPTIONS_START_LINE - 1, LINE_TEXT_START_POSITION);
+    else
+        move(AVAILABLE_OPTIONS_START_LINE - 1, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+    printw("%s", temp_string.c_str());
+
+    temp_string.clear();
+    temp_string = "4. Print available databases";
+    if(text_position == 1)                         // check if text should be left side aligned or centered and write accordingly
+        move(AVAILABLE_OPTIONS_START_LINE, LINE_TEXT_START_POSITION);
+    else
+        move(AVAILABLE_OPTIONS_START_LINE, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+    printw("%s", temp_string.c_str());
+
+    temp_string.clear();
+    temp_string = "Press Enter to go back to main menu";
+    draw_line(decorator_type);                     // draw the bottom line
+    if(text_position == 1)                         // check if text should be left side aligned or centered and write accordingly
+        move(LINES - 2, LINE_TEXT_START_POSITION);
+    else
+        move(LINES - 2, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+    printw("%s", temp_string.c_str());
+    refresh();
+}
+
+int Menu::manage_database_menu(){
+    page_number = 0; // reset all_database_page_number
+    print_manage_database();
+    while(true){    
         if(check_resize())                             // check if the window was resized by the user and re-enter the menu to re-draw everything
             return 1;
 
@@ -231,210 +261,151 @@ int Menu::manage_database(){
             return 5;
             break;
         default:
-            printw("Invalid Choice!");  // Warn user they pressed an invalid key
-            break;
+            continue;
         }
     }
 }
 
-int Menu::load_database(){
+void Menu::print_load_database(bool is_empty, bool is_paged){
     // create the outline box using the preferred decorator, write the menu name and program title
     clear();
     draw_main_box(decorator_type);
-    move(1,3);
+    move(MENU_TITTLE_LINE_POSITION, LINE_TEXT_START_POSITION);
     printw("Load Database");
-    move(1, COLS - 28);
-    printw("Terminal Database Manager");
+    print_program_tittle();
+
     draw_line(decorator_type);                                                                     // draw the bottom line
     // write out the menu options
-    move(LINES / 2 - 4, COLS / 2 - 11);
-    printw("Press Enter to go back.");
-    refresh();
+    string temp_string = "Press Enter to go back.";
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 4, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+    printw("%s", temp_string.c_str());
 
-    bool is_paged = false;
-    if (database_vector.empty()){                    // check if there are any databases to print
-        move(8, COLS / 2 - 16);
-        printw("There are no available databases."); // and tell the user there's nothing to display
+    if (is_empty){                    // check if there are any databases to print
+        temp_string.clear();
+        temp_string = "There are no available databases.";
+        move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 6, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+        printw("%s", temp_string.c_str()); // and tell the user there's nothing to display
+
+        temp_string.clear();
+        temp_string = "Press any key to continue...";
         if(text_position == 1)
-            move(LINES - 2, 3);
+            move(USER_INPUT_LINE, LINE_TEXT_START_POSITION);
         else
-            move(LINES - 2, COLS / 2 - 14);
-        printw("Press any key to continue...");
-        getch();
-        return 1;
+            move(USER_INPUT_LINE, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+        printw("%s", temp_string.c_str());
+        return;
     }else{
+        temp_string.clear();
+        temp_string = "Available Databases";
+        if(text_position == 1)                                                                      // check if text should be left side aligned or centered and write accordingly
+            move(AVAILABLE_OPTIONS_START_LINE - number_of_entries, LINE_TEXT_START_POSITION);
+        else
+            move(AVAILABLE_OPTIONS_START_LINE - number_of_entries, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+        printw("%s", temp_string.c_str());
+
+        for(int i = 0; i < number_of_entries; i++){
+            if(i + page_number * number_of_entries < static_cast<int>(database_vector.size())){
+                if(text_position == 1)                                                                       // check if text should be left side aligned or centered and write accordingly
+                    move(AVAILABLE_OPTIONS_START_LINE - i, LINE_TEXT_START_POSITION);
+                else
+                    move(AVAILABLE_OPTIONS_START_LINE - i, CENTERED_LINE_TEXT_START_POSITION - (database_vector[i + page_number * number_of_entries].get_database_name().length() / 2));
+                printw("%d.%s", database_vector[i + page_number * number_of_entries].get_database_id(), database_vector[i + page_number * number_of_entries].get_database_name().c_str());
+            }
+        }
+        
+        if(is_paged){
+            temp_string.clear();
+            temp_string = "Page " + to_string(page_number + 1);
+            move(CENTERED_AVAILABLE_OPTIONS_START_LINE + 2, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+            printw("%s", temp_string.c_str());
+        }
+
+        print_load_database_options(is_paged);
+    }
+    refresh();
+}
+
+void Menu::print_load_database_options(bool is_paged){
+    string temp_string = "1 - Previous Page";
+    int offset = 5;
+    int current_position = LINE_TEXT_START_POSITION + offset;
+    if(is_paged){                                 // if there ARE pages, show the page buttons
+        move(USER_INPUT_LINE, current_position);
+        printw("%s", temp_string.c_str());
+        current_position += temp_string.length() + offset;
+    }
+
+    temp_string.clear();
+    temp_string = "2 - Choose Database";
+    move(USER_INPUT_LINE, current_position);
+    printw("%s", temp_string.c_str());
+    current_position += temp_string.length() + offset;
+
+    temp_string.clear();
+    temp_string = "3 - Find";
+    move(USER_INPUT_LINE, current_position);
+    printw("%s", temp_string.c_str());
+    current_position += temp_string.length() + offset;
+
+    temp_string.clear();
+    temp_string = "4 - Edit";
+    move(USER_INPUT_LINE, current_position);
+    printw("%s", temp_string.c_str());
+    current_position += temp_string.length() + offset;
+
+    if(is_paged){
+        temp_string.clear();
+        temp_string = "5 - Next Page";
+        move(USER_INPUT_LINE, current_position);
+        printw("%s", temp_string.c_str());
+    }
+}
+
+int Menu::load_database_menu(){
+    bool is_paged = false;
+    bool is_empty = database_vector.empty();
+    
+    if(!is_empty)
         if(static_cast<int>(database_vector.size()) > number_of_entries) // if there IS something to display, check if you need pages
             is_paged = true;
 
-       if(text_position == 1)                                                                      // check if text should be left side aligned or centered and write accordingly
-            move(LINES - 4 - number_of_entries, 3);
-        else
-            move(LINES - 4 - number_of_entries, COLS / 2 - 9);
-        printw("Available Databases");
+    print_load_database(is_empty, is_paged);
+        
+    if(is_empty){
+        getch();
+        return 1; 
+    }
 
-        for(int i = 0; i < number_of_entries; i++){
-            if(i + all_database_page_number * number_of_entries < static_cast<int>(database_vector.size())){
-                if(text_position == 1)                                                                     // check if text should be left side aligned or centered and write accordingly
-                    move(LINES - 4 - i, 3);
-                else
-                    move(LINES - 4 - i, COLS / 2 - (database_vector[i + all_database_page_number * number_of_entries].get_database_name().length() / 2));
-                printw("%d.%s", database_vector[i + all_database_page_number * number_of_entries].get_database_id(), database_vector[i + all_database_page_number * number_of_entries].get_database_name().c_str());
-            }
-        }
+    while(true){
+        int choice = getch(); // get user input
+        if(check_resize())    // check if the window was resized by the user and re-enter the menu to re-draw everything
+            return 3;
 
-        while(true){
-            if(is_paged){                                 // if there ARE pages, show the page buttons
-                move(LINES - 2, 3);
-                printw("1 - Previous Page");
-                move(LINES - 2, 17 + 3 + 10 + 19 + 8 + 10 + 10 + 12);
-                printw("5 - Next Page");
-            }
+        if(sound)             // make ANNOYING sound if sound turned on 
+            beep();
 
-            move(LINES - 2, 17 + 3 + 10);
-            printw("2 - Choose Database");
-
-            move(LINES - 2, 17 + 3 + 10 + 19 + 5);
-            printw("3 - Find");
-
-            move(LINES - 2, 17 + 3 + 10 + 19 + 8 + 5 + 5);
-            printw("4 - Edit");   
-
-            int choice = getch(); // get user input
-            if(check_resize())    // check if the window was resized by the user and re-enter the menu to re-draw everything
+        switch (choice){
+            case 49:
+                if(is_paged)                                                                                                        // if the button is shown (there are pages)
+                    decrement_page();
                 return 3;
-
-            if(sound)             // make ANNOYING sound if sound turned on 
-                beep();
-
-            switch (choice){
-                    case 49:{
-                        if(is_paged){                                                                                                        // if the button is shown (there are pages)
-                            if(continuous_mode){                                                                                                // if Continuous Mode on
-                                if(all_database_page_number == 0){                                                                             // if on page 0
-                                    all_database_page_number = static_cast<int>(database_vector.size()) / number_of_entries;                      // go to last page
-                                }else{all_database_page_number--;}                                                                             // otherwise just decrement the page number
-                            }else if(all_database_page_number > 0){                                                                         // othetwise, if NOT on page 0
-                                    all_database_page_number --;                                                                               // go to the previous page
-                            }}else                                                                                                          // otherwise just ignore the input
-                                return 3;
-                        return 3;
-                    }
-                    case 50:{
-                        while(true){
-                            move(LINES - 2, 3);
-                            for(int i = 3; i < COLS - 4; i++)
-                                printw(" ");
-                            if(text_position == 1)
-                                move(LINES - 2, 3);
-                            else
-                                move(LINES - 2, COLS / 2 - 8);
-                            printw("Choose database: ");
-                            echo();
-                            nocbreak();
-                            char database_choice[3];
-                            getnstr(database_choice, sizeof(database_choice) - 1);
-                            noecho();
-                            cbreak();
-
-                            if(database_choice[0] == '\0')
-                                break;
-
-                            if((choice - '0') > static_cast<int>(database_vector.size())){
-                                if(text_position == 1)                                                             // check if text should be left side aligned or centered and write accordingly
-                                    move(LINES - 2, 3);
-                                else                                                       
-                                    move(LINES - 2, COLS / 2 - 35);
-                                printw("Invalid choice! Try entering a valid index. Press Enter to continue...");  // and warn him about it
-                                while(true)
-                                    if(getch() != 10)
-                                        continue;
-                                continue;
-                            }else{
-                                for(int i = 0; i < static_cast<int>(database_vector.size()); i++)
-                                    if(stoi(database_choice) == database_vector[i].get_database_id())
-                                        current_database = database_vector[i];                                   // make the selected database active
-                                return 6;
-                            }
-                        }
-                        continue;
-                    }
-                    case 51:{
-                        move(LINES - 2, 3);
-                        for(int i = 3; i < COLS - 4; i++)
-                            printw(" ");
-
-                        if(text_position == 1)                                                                      // check if text should be left side aligned or centered and write accordingly
-                            move(LINES - 4 - number_of_entries, 3);
-                        else
-                            move(LINES - 4 - number_of_entries, COLS / 2 - 9);
-                        printw("Matching Databases");
-
-                        move(LINES - 2, 3);
-                        printw("Search:");
-
-                        string input_word = "";
-                        int counter = 0;
-
-                        for (int i = 0; i < number_of_entries; i++){
-                                move(LINES - 4 - i, 3);
-                                for (int j = 0; j < COLS / 2; j++)
-                                    printw(" ");
-                        }
-
-                        while (true) {
-                            int input_char = getch();
-
-                            if (input_char == KEY_BACKSPACE){
-                                if (counter > 0) {
-                                    input_word.pop_back();
-                                    counter--;
-                                }
-                            }else if (input_char == 10 || input_char == KEY_ENTER){
-                                break;
-                            }else if (isprint(input_char)){                         // check if it's a printable character and not junk
-                                    input_word += static_cast<char>(input_char);
-                                    counter++;
-                            }
-
-                            move(LINES - 2, 10);
-                            for (int i = 0; i < COLS - 11; i++) 
-                                printw(" ");
-                            move(LINES - 2, 10);
-                            printw("%s", input_word.c_str());
-
-                            for (int i = 0; i < number_of_entries; i++){
-                                move(LINES - 4 - i, 3);
-                                for (int j = 0; j < COLS / 2; j++)
-                                    printw(" ");
-                            }
-
-                            refresh();
-
-                            vector<Database> found_databases = match_word(input_word);
-                            print_found_databases(found_databases);
-                            found_databases.clear();
-                        }                            
-                        noecho();
-                        cbreak();
-                        continue;
-                    }
-                    case 10:
-                        return 1;
-                    case 53:{
-                        if(is_paged){                                                                                                       // if the button is shown (there are pages)            
-                            if(continuous_mode){                                                                                               // if Continuous Mode on                       
-                                if(all_database_page_number == static_cast<int>(database_vector.size()) / number_of_entries){                 // if on the last page
-                                    all_database_page_number = 0;                                                                                // go to page 0
-                                }else{all_database_page_number++;}                                                                            // otherwise just increment the page number
-                            }else if(all_database_page_number < static_cast<int>(database_vector.size()) / number_of_entries){             // oterwise, if NOT on the last page
-                                all_database_page_number ++;                                                                                  // go to next page
-                            }}else         
-                                return 3;                                                                                                   // otherwise just ignore this input
-                        return 3;
-                    }  
-                    default:
-                        continue;
-            }
+            case 50:
+                if(choose_database())
+                    return 6;
+                else
+                    return 3;
+            case 51:
+                find_database();
+                print_load_database_options(is_paged);
+                continue;
+            case 10:
+                return 1;
+            case 53:
+                if(is_paged)                                                                                                     // if the button is shown (there are pages)            
+                    increment_page();                                                                                 // otherwise just ignore this input
+                return 3; 
+            default:
+                continue;
         }
     }
     return 6;                                                                              // go to Print Current Database Menu
@@ -444,20 +415,23 @@ int Menu::create_database(){
     // create the outline box using the preferred decorator, write the menu name and program title
     clear();
     draw_main_box(decorator_type);
-    move(1,3);
+    move(MENU_TITTLE_LINE_POSITION, LINE_TEXT_START_POSITION);
     printw("Create Database");
-    move(1, COLS - 28);
-    printw("Terminal Database Manager");
-    move(LINES / 2 - 4, COLS / 2 - 25);
-
-    // write out the menu options
-    printw("Leave blank and press Enter to cancel and go back!");
+    print_program_tittle();
     draw_line(decorator_type);                                    // draw the bottom line
+    
+    // write out the menu options
+    string temp_string = "Leave blank and press Enter to cancel and go back!";
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 4, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+    printw("%s", temp_string.c_str());
+
+    temp_string.clear();
+    temp_string = "Database name: ";
     if(text_position == 1)                                        // check if text should be left side aligned or centered and write accordingly
-            move(LINES - 2,3);
+            move(USER_INPUT_LINE, LINE_TEXT_START_POSITION);
         else
-            move(LINES - 2, COLS / 2 - 7);
-    printw("Database name: ");
+            move(USER_INPUT_LINE, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+    printw("%s", temp_string.c_str());
 
     echo();                                                                                                                            // enable echo 
     nocbreak();                                                                                                                        // enable buffering
@@ -476,9 +450,19 @@ int Menu::create_database(){
 
     string database_path = "files/" + (string)database_name + ".txt";                                                                  // otherwise, create the path to the database 
 
-    if(filesystem::exists(database_path)){                                                                                            // check if the database already exists
-        move(LINES - 2, 3);
-        printw("This database already exists! Do you want to overwrite? (Y / N) WARNING: This can lead to loss of important data!!!"); // and if it does, warn the user
+    if(filesystem::exists(database_path)){  
+        temp_string.clear();
+        temp_string = "This database already exists!";
+        move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 5, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+        printw("%s", temp_string.c_str());
+
+        temp_string = "WARNING: This can lead to loss of important data!!!";   
+        move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 4, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);                                                                                       // check if the database already exists
+        printw("%s", temp_string.c_str());
+
+        temp_string = "Do you want to overwrite? (Y / N)"; 
+        move(USER_INPUT_LINE, LINE_TEXT_START_POSITION);
+        printw("%s", temp_string.c_str()); // and if it does, warn the user
         while(true){                                                                                                                   // and determine the next course of action
             int choice = getch();
             if(choice == 121 || choice == 89){      // lower and upper case y in ASCII                                                 // if they want to overwrite
@@ -509,336 +493,382 @@ int Menu::create_database(){
     save_settings();                                                          // save the settings
     reload_database_vector();                                                 // reload the database vector to reflect the changes
 
+    temp_string.clear();
+    temp_string = "Database created successfully!";
     if(text_position == 1)                    // check if text should be left side aligned or centered and write accordingly
-            move(LINES - 2,3);
+            move(USER_INPUT_LINE, LINE_TEXT_START_POSITION);
         else
-            move(LINES - 2, COLS / 2 - 15);
-    printw("Database created successfully!"); // tell the user that the database was created successfully!
+            move(USER_INPUT_LINE, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+    printw("%s", temp_string.c_str());        // tell the user that the database was created successfully!
     return 1;                                 // go back to the Database Manager Menu
 }
 
-int Menu::delete_database(){
+void Menu::print_delete_database_menu(bool is_empty, bool is_paged){
     // create the outline box using the preferred decorator, write the menu name and program title
     clear();
     draw_main_box(decorator_type);
     move(1, 3);
     printw("Delete Database");
-    move(1, COLS - 28);
-    printw("Terminal Database Manager");
+    print_program_tittle();
     draw_line(decorator_type);           // draw the bottom line
     refresh();
 
     // write out the menu options, infos and warnings
-    move(LINES / 2 - 4, COLS / 2 - 5);
-    printw("WARNING!!!");
-    move(LINES / 2 - 3, COLS / 2 - 17);
-    printw("Deleting a database is PERMANENT!!!");
-    move(LINES / 2 - 1, COLS / 2 - 11);
-    printw("Press Enter to go back");
+    string temp_string = "WARNING!!!";
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 4, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+    printw("%s", temp_string.c_str());
+
+    temp_string.clear();
+    temp_string = "Deleting a database is PERMANENT!!!";
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 3, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+    printw("%s", temp_string.c_str());
+
+    temp_string.clear();
+    temp_string = "Press Enter to go back";
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 1, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+    printw("%s", temp_string.c_str());
     
+    temp_string.clear();
+    temp_string = "Available databases";
     if(text_position == 1)                                                                          // check if text should be left side aligned or centered and write accordingly
-        move(LINES - 4 - number_of_entries, 3);
+        move(AVAILABLE_OPTIONS_START_LINE - number_of_entries, 3);
     else
-        move(LINES - 4 - number_of_entries, COLS / 2 - 9);
-    printw("Available databases");
-
-    bool is_paged = false;
-    if (database_vector.empty()){                    // check if there are any databases to print
-        move(8, COLS / 2 - 16);
-        printw("There are no available databases."); // and tell the user there's nothing to display
+        move(AVAILABLE_OPTIONS_START_LINE - number_of_entries, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+    printw("%s", temp_string.c_str());
+    if(is_empty){
+        temp_string.clear();
+        temp_string = "There are no available databases."; 
+        move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 6, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+        printw("%s", temp_string.c_str()); // and tell the user there's nothing to display
+        
+        temp_string.clear();
+        temp_string = "Press any key to continue...";
         if(text_position == 1)
-            move(LINES - 2, 3);
+            move(USER_INPUT_LINE, LINE_TEXT_START_POSITION);
         else
-            move(LINES - 2, COLS / 2 - 14);
-        printw("Press any key to continue...");
-        getch();
-        return 1;
-    }else{
-        if(static_cast<int>(database_vector.size()) > number_of_entries)
-            is_paged = true;
+            move(USER_INPUT_LINE, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+        printw("%s", temp_string.c_str());
+        return;
+    }
 
-        string page_number_string = "Page " + to_string(all_database_page_number); // print the page number
-        move(LINES / 2 + 1, COLS / 2 - page_number_string.length() / 2);
-        printw("%s", page_number_string.c_str());
+    if(is_paged){
+        temp_string.clear();
+        temp_string = "Page " + to_string(page_number + 1);
+        move(CENTERED_AVAILABLE_OPTIONS_START_LINE + 2, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+        printw("%s", temp_string.c_str());
+    }
 
-        for(int i = 0; i < number_of_entries; i++){                                                                                                                                          
-            if(i + all_database_page_number * number_of_entries < static_cast<int>(database_vector.size())){                                                                        // starting with the LAST database in the vector
-                if(text_position == 1)                                                                      // check if text should be left side aligned or centered and write accordingly
-                    move(LINES - 4 - i, 3);
-                else
-                    move(LINES - 4 - i, COLS / 2 - (database_vector[i + all_database_page_number * number_of_entries].get_database_name().length() / 2));    
-                printw("%d.%s", database_vector[i + all_database_page_number * number_of_entries].get_database_id(), database_vector[i + all_database_page_number * number_of_entries].get_database_name().c_str());                         // print ID.Name
-            }                                                                                               // TODO: THIS NEEDS TO HAVE PAGES!!!
+    for(int i = 0; i < number_of_entries; i++){                                                                                                                                          
+        if(i + page_number * number_of_entries < static_cast<int>(database_vector.size())){                                                                        // starting with the LAST database in the vector
+            if(text_position == 1)                                                                      // check if text should be left side aligned or centered and write accordingly
+                move(AVAILABLE_OPTIONS_START_LINE - i, LINE_TEXT_START_POSITION);
+            else
+                move(AVAILABLE_OPTIONS_START_LINE - i, CENTERED_LINE_TEXT_START_POSITION - (database_vector[i + page_number * number_of_entries].get_database_name().length() / 2));    
+            printw("%d.%s", database_vector[i + page_number * number_of_entries].get_database_id(), database_vector[i + page_number * number_of_entries].get_database_name().c_str());                         // print ID.Name
+        }                                                                                               // TODO: THIS NEEDS TO HAVE PAGES!!!
+    } 
+}
+
+void Menu::print_delete_database_menu_options(bool is_paged){
+    int initial_offset = 8;
+    int offset = 5;
+    int current_position = LINE_TEXT_START_POSITION + initial_offset + offset;
+
+    string temp_string;
+    if(is_paged){
+        temp_string = "1 - Previous Page";
+        move(USER_INPUT_LINE, current_position);
+        printw("%s", temp_string.c_str());
+        current_position += temp_string.length() + offset;
+    }
+
+    temp_string.clear();
+    temp_string = "2 - Choose Database";
+    move(USER_INPUT_LINE, current_position);
+    printw("%s", temp_string.c_str());
+    current_position += temp_string.length() + offset;
+    
+    temp_string.clear();
+    temp_string = "3 - Find";
+    move(USER_INPUT_LINE, current_position);
+    printw("%s", temp_string.c_str());
+    current_position += temp_string.length() + offset;
+
+    if(is_paged){
+        temp_string.clear();
+        temp_string = "3 - Next Page";
+        move(USER_INPUT_LINE, current_position);
+        printw("%s", temp_string.c_str());
+    }
+}
+
+void Menu::print_delete_database_choose_menu(){
+    move(USER_INPUT_LINE, LINE_TEXT_START_POSITION);
+    for(int i = LINE_TEXT_START_POSITION; i < LAST_COLUMN_OF_TEXT - LINE_TEXT_START_POSITION; i++)
+        printw(" ");
+
+    string temp_string = "Choose database to delete: ";
+    if(text_position == 1)
+        move(USER_INPUT_LINE, LINE_TEXT_START_POSITION);
+    else
+        move(USER_INPUT_LINE, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+    printw("%s", temp_string.c_str());
+}
+
+void Menu::print_delete_database_confirm_deletion_menu(){
+    // write the new info message to teach the user how to confirm deleting the database
+    string temp_string = "Type DELETE to confirm deleting the database!";
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 1, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+    printw("%s", temp_string.c_str());
+
+    temp_string.clear();
+    temp_string = "Leave blank and press Enter to cancel and go back";
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+    printw("%s", temp_string.c_str());
+}
+
+bool Menu::delete_database(){
+    bool is_confirmed = false;
+    int i = 0;
+    for(i; i < static_cast<int>(database_vector.size()); i++)
+        if(database_vector[i].get_database_id() == current_database.get_database_id()){
+            is_confirmed = current_database.delete_database();                          // if the user DID successfully type "DELETE", delete the database file, BUT get confirmation
+            break;
         }
 
-        while(true){
-            if(is_paged){                                 // if there ARE pages, show the page buttons
-                move(LINES - 2, 3);
-                printw("1 - Previous Page");
-                move(LINES - 2, 17 + 3 + 10 + 19 + 8 + 10 + 10 + 12);
-                printw("3 - Next Page");
-            }
+    if(is_confirmed){
+        database_vector.erase(database_vector.begin() + i);              // remove the database from the vector
 
-            move(LINES - 2, 17 + 3 + 12);
-            printw("2 - Choose Database");
+    current_database_index = 0;                                          // get the new current_database_index 
+    for(int j = 0; j < static_cast<int>(database_vector.size()); j++)
+        if(database_vector[j].get_database_id() == current_database_index)
+            current_database_index++; 
+        else if(database_vector[j].get_database_id() != current_database_index)
+            break;
+    }
 
-            move(LINES - 2, 17 + 3 + 10 + 19 + 18);
-            printw("3 - Find");
+    return is_confirmed;
+}
 
-            int choice = getch(); // get user input
-            
-            if(check_resize())    // check if the window was resized by the user and re-enter the menu to re-draw everything
-                return 3;
+void Menu::print_delete_database_confirm_deletion_prompt(bool is_confirmed){
+    move(USER_INPUT_LINE, LINE_TEXT_START_POSITION);
+    if(is_confirmed)
+        printw("Database deleted! Press any key to continue...");
+    else
+        printw("Database could not be deleted! Press any key to continue...");
+}
 
-            if(sound)             // make ANNOYING sound if sound turned on 
-                beep();
+int Menu::delete_database_menu(){
+    bool is_paged = false;
+    bool is_empty = database_vector.empty();
+    if (!is_empty){                          // check if there are any databases to print
+        if(static_cast<int>(database_vector.size()) > number_of_entries)
+            is_paged = true;
+        print_delete_database_menu(is_empty, is_paged);
+        print_delete_database_menu_options(is_paged);
+    }else{
+        getch();
+        return 1;
+    }
 
-            switch (choice){
-                    case 49:{
-                        if(is_paged){                                                                                                        // if the button is shown (there are pages)
-                            if(continuous_mode){                                                                                                // if Continuous Mode on
-                                if(all_database_page_number == 0){                                                                             // if on page 0
-                                    all_database_page_number = static_cast<int>(database_vector.size()) / number_of_entries;                      // go to last page
-                                }else{all_database_page_number--;}                                                                             // otherwise just decrement the page number
-                            }else if(all_database_page_number > 0){                                                                         // othetwise, if NOT on page 0
-                                    all_database_page_number --;                                                                               // go to the previous page
-                            }}else                                                                                                          // otherwise just ignore the input
-                                return 4;
+    while(true){
+        int choice = getch(); // get user input
+        
+        if(check_resize())    // check if the window was resized by the user and re-enter the menu to re-draw everything
+           return 3;
+
+        if(sound)             // make ANNOYING sound if sound turned on 
+           beep();
+
+        switch (choice){
+                case 49:
+                    if(is_paged)
+                       decrement_page();
+                    return 4;
+                case 50:{
+                    print_delete_database_choose_menu();
+                    echo();
+                    nocbreak();
+                    char database_choice[3];
+                    getnstr(database_choice, sizeof(database_choice) - 1);
+                    noecho();
+                    cbreak();
+                    if(sound)                                                             // make ANNOYING sound if sound turned on
+                        beep();
+                    echo();                                      // echo on
+                    nocbreak();                                  // buffering on
+
+                    if(database_choice[0] == '\0')                                                // if the user pressed Enter, go back
                         return 4;
-                    }
-                    case 50:{
-                        while(true){
-                            move(LINES - 2, 3);
-                            for(int i = 3; i < COLS - 4; i++)
-                                printw(" ");
-                            if(text_position == 1)
-                                move(LINES - 2, 3);
-                            else
-                                move(LINES - 2, COLS / 2 - 8);
-                            printw("Choose database to delete: ");
-                            echo();
-                            nocbreak();
-                            char database_choice[3];
-                            getnstr(database_choice, sizeof(database_choice) - 1);
-                            noecho();
-                            cbreak();
-
-                            if(database_choice[0] == '\0')                                                // if the user pressed Enter, go back
+                    else {
+                        for(int i = 0; i < static_cast<int>(database_vector.size()); i++)
+                            if(stoi(database_choice) == database_vector[i].get_database_id()){
+                                current_database = database_vector[i];
                                 break;
-
-                            if(stoi(database_choice) > static_cast<int>(database_vector.size())){     // if the user chose a number, check if it was NOT a valid database id
-                                if(text_position == 1)                                                // check if text should be left side aligned or centered and write accordingly
-                                    move(LINES - 2, 3);
-                                else
-                                    move(LINES - 2, COLS / 2 - 29);
-                                printw("Invalid choice! Try entering a valid index. Select Index: "); // and warn him about it
-                                echo();                                                               // enable echo 
-                                nocbreak();                                                           // enable buffering
-                                char choice_char[2];                                                  
-                                getnstr(choice_char, sizeof(choice_char));                            // get user input again
-                                if(check_resize()){                                                   // check if the window was resized by the user and re-enter the menu to re-draw everything
-                                    noecho();                                                         // disable echo
-                                    cbreak();                                                         // disable buffering
-                                    return 4;
-                                }
-                                noecho();                                                             // disable echo
-                                cbreak();                                                             // disable buffering
-                                if(sound)                                                             // make ANNOYING sound if sound turned on
-                                    beep();
-
-                                if(choice > static_cast<int>(database_vector.size())){                // if the user pressed a number key, check if it was NOT a valid index AGAIN
-                                    if(text_position == 1)                                            // check if text should be left side aligned or centered and write accordingly
-                                        move(LINES - 2, 3);
-                                    else
-                                        move(LINES - 2, COLS / 2 - 20);
-                                    printw("There have been too many invalid choices! Press any key to continue and go back..."); // tell him he/she had his/her chance and go back, because deleting a database is serious bussiness
-                                    for(int j = 85; j < COLS; j++)
-                                        printw(" ");
-                                    getch();
-                                    return 1;
-                                }
-                            }else{
-                                // write the new info message to teach the user how to confirm deleting the database
-                                move(LINES / 2 - 1, COLS / 2 - 22);
-                                printw("Type DELETE to confirm deleting the database!");
-                                move(LINES / 2, COLS / 2 - 24);
-                                printw("Leave blank and press Enter to cancel and go back");
-                                while(true){
-                                    move(LINES - 2, 3);
-                                    for(int i = 0; i < COLS - 4; i++)
-                                        printw(" ");
-                                    move(LINES - 2, 3);
-
-                                    //TODO: ADD RESIZE!!!
-
-                                    echo();                                      // echo on
-                                    nocbreak();                                  // buffering on
-                                    char confirmation[7];                        
-                                    getnstr(confirmation, sizeof(confirmation) - 1); // get user input
-                                    if(check_resize()){                          // check if the window was resized by the user and re-enter the menu to re-draw everything
-                                            noecho();                            // disable echo
-                                            cbreak();                            // disable buffering
-                                            return 4;
-                                    }
-                                    if(sound)                                    // make ANNOYING sound if sound turned on
-                                        beep(); 
-                                    noecho();                                    // no echo
-                                    cbreak();                                    // no buffering
-
-                                    if(confirmation[0] == '\0')                  // if the user left blank and pressed Enter, go back
-                                        return 0;
-
-                                    int status = 1;
-                                    while(status == 1)
-                                        if(strcmp(confirmation, "DELETE") != 0){                                    // if the user unsuccessfully typed "DELETE"
-                                            move(LINES - 2, 3);
-                                            printw("Invalid Input! Do you want to try again? (Y / N): ");           // warn them and ask if they want to try again
-                                            int input = getch();
-                                            if(check_resize())                                                      // check if the window was resized by the user and re-enter the menu to re-draw everything
-                                                return 4;
-                                            if(sound)
-                                                beep();
-
-                                            if(confirmation[0] == '\0')
-                                                status = 0;
-
-                                            if(input == 121 || input == 89)       // lower and upper case y in ASCII
-                                                break;                            // break this loop and try again
-
-                                            else if(input == 110 || input == 78){ // lower and upper case n in ASCII
-                                                status = 0;
-                                            }
-                                        }else
-                                            status = 2;
-
-                                    if(status == 2){
-                                        bool is_confirmed = false;
-                                        int i = 0;
-                                        for(i; i < static_cast<int>(database_vector.size()); i++)
-                                            if(database_vector[i].get_database_id() == stoi(database_choice)){
-                                                is_confirmed = database_vector[i].delete_database();                         // if the user DID successfully type "DELETE", delete the database file, BUT get confirmation
-                                                break;
-                                            }
-
-                                        if(is_confirmed){
-                                            database_vector.erase(database_vector.begin() + i);                      // remove the database from the vector
-
-                                            current_database_index = 0;                                         // get the new current_database_index 
-                                            for(int j = 0; j < static_cast<int>(database_vector.size()); j++)
-                                                if(database_vector[j].get_database_id() == current_database_index)
-                                                    current_database_index++;                                                             
-
-                                            ofstream index_manager("index_manager.txt");                                     // rewrite index_manager
-                                            for(int j = 0; j < static_cast<int>(database_vector.size()); j++) 
-                                                index_manager << j << '.' << database_vector[j].get_database_name() << '\n';
-                                            index_manager.close();                                                           // close the file
-                                            reload_database_vector();                                                        // reload the database_vector to reflect the changes
-                                            move(LINES - 2, 3);
-                                            printw("Database deleted! Press any key to continue...");
-                                            getch();
-                                            return 1;
-                                        }
-                                    }else{
-                                        printw("Operation canceled! Press any key to continue...");                      // tell the user there was an error and the database was NOT deleted
-                                        getch();
-                                        return 1;
-                                    }
-                                }
+                            }else if(i == static_cast<int>(database_vector.size())){
+                                print_invalid_input();
+                                return 4;
                             }
-                        }
-                        continue;
                     }
-                    case 10:
-                        return 1;
-                    case 51:{
-                        if(is_paged){                                                                                                       // if the button is shown (there are pages)            
-                            if(continuous_mode){                                                                                               // if Continuous Mode on                       
-                                if(all_database_page_number == static_cast<int>(database_vector.size()) / number_of_entries){                 // if on the last page
-                                    all_database_page_number = 0;                                                                                // go to page 0
-                                }else{all_database_page_number++;}                                                                            // otherwise just increment the page number
-                            }else if(all_database_page_number < static_cast<int>(database_vector.size()) / number_of_entries){             // oterwise, if NOT on the last page
-                                all_database_page_number ++;                                                                                  // go to next page
-                            }}else         
-                                return 4;                                                                                                   // otherwise just ignore this input
-                        return 4;
-                    }  
-                    default:
-                        continue;
-            }
+                    
+                    print_delete_database_confirm_deletion_menu();
+                    while(true){
+                        clear_user_input_zone();
+                        
+                        //TODO: ADD RESIZE!!!
+
+                        char confirmation[7];                        
+                        getnstr(confirmation, sizeof(confirmation) - 1); // get user input
+                        if(check_resize()){                              // check if the window was resized by the user and re-enter the menu to re-draw everything
+                            noecho();                                 // disable echo
+                            cbreak();                                 // disable buffering
+                            return 4;
+                        }
+                        if(sound)                                    // make ANNOYING sound if sound turned on
+                            beep(); 
+                        noecho();                                    // no echo
+                        cbreak();                                    // no buffering
+                                
+                        if(confirmation[0] == '\0')                  // if the user left blank and pressed Enter, go back
+                            return 1;
+                        else if(strcmp(confirmation, "DELETE") != 0){                                    // if the user unsuccessfully typed "DELETE"
+                                print_invalid_input();
+                                getch();
+                                if(sound)
+                                    beep();
+                                return 4;
+                        }else{
+                            bool is_confirmed = delete_database();                                                            
+                            update_index_manager();
+                            reload_database_vector();                                                        // reload the database_vector to reflect the changes
+                            print_delete_database_confirm_deletion_prompt(is_confirmed);
+                            getch();
+                            return 1;
+                        }
+                    }
+                    return 4;
+                }
+                case 10:
+                    return 1;
+                 case 51:
+                    increment_page();                                                                                                  // otherwise just ignore this input
+                    return 4;
+                 default:
+                     continue;
         }
     }
     return 1;                                                                                // return to Manage Databases Menu
 }
 
-int Menu::print_databases(){
+void Menu::print_available_databases_menu(bool is_empty, bool is_paged){
     // create the outline box using the preferred decorator, write the menu name and program title
     clear();
     draw_main_box(decorator_type);
-    move(1, 3);
+    move(MENU_TITTLE_LINE_POSITION, LINE_TEXT_START_POSITION);
     printw("Available Databases");
-    move(1, COLS - 28);
-    printw("Terminal Database Manager");
+    print_program_tittle();
     draw_line(decorator_type);           // draw the bottom line
     refresh();
 
-    bool is_paged = false;
-    if (database_vector.empty()){                    // check if there are any databases to print
-        move(8, COLS / 2 - 16);
-        printw("There are no available databases."); // and tell the user there's nothing to display
+    string temp_string;
+    if(is_empty){
+        temp_string = "There are no available databases.";
+        move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 6, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+        printw("%s", temp_string.c_str()); // and tell the user there's nothing to display
+        
+        temp_string.clear();
+        temp_string = "Press any key to continue...";
         if(text_position == 1)
-            move(LINES - 2, 3);
+            move(USER_INPUT_LINE, LINE_TEXT_START_POSITION);
         else
-            move(LINES - 2, COLS / 2 - 14);
-        printw("Press any key to continue...");
-        getch();
-        return 1;
+            move(USER_INPUT_LINE, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+        printw("%s", temp_string.c_str());
     }else{
-        if(static_cast<int>(database_vector.size()) > number_of_entries) // if there IS something to display, check if you need pages
-            is_paged = true;
-                                                              // and write out the structure
-
+        temp_string.clear();
+        temp_string = "Available Databases";
         if(text_position == 1)                                // check if text should be left side aligned or centered and write accordingly
-            move(LINES - 4 - number_of_entries, 3);
+            move(AVAILABLE_OPTIONS_START_LINE - number_of_entries - 2, LINE_TEXT_START_POSITION);
         else
-            move(LINES - 4 - number_of_entries, COLS / 2 - 3 - 11 - 5);
-        printw("Database ID");
+            move(AVAILABLE_OPTIONS_START_LINE - number_of_entries, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+        printw("%s", temp_string.c_str());
 
+        temp_string.clear();
+        temp_string = "Database ID";                                               
+        int database_id_offset = 5 + temp_string.length();
         if(text_position == 1)                                // check if text should be left side aligned or centered and write accordingly
-            move(LINES - 4 - number_of_entries, 20);
+            move(AVAILABLE_OPTIONS_START_LINE - number_of_entries, LINE_TEXT_START_POSITION);
         else
-            move(LINES - 4 - number_of_entries, COLS / 2 + 6 + 5);
-        printw("Database Name");
+            move(AVAILABLE_OPTIONS_START_LINE - number_of_entries, CENTERED_LINE_TEXT_START_POSITION - database_id_offset);
+        printw("%s", temp_string.c_str());
 
-        string page_number_string = "Page " + to_string(all_database_page_number); // print the page number
-        move(LINES / 2, COLS / 2 - page_number_string.length() / 2);
-        printw("%s", page_number_string.c_str());
+        temp_string.clear();
+        temp_string = "Database Name";
+        int database_name_offset = 5 + temp_string.length();
+        if(text_position == 1)                                // check if text should be left side aligned or centered and write accordingly
+            move(AVAILABLE_OPTIONS_START_LINE - number_of_entries, database_name_offset);
+        else
+            move(AVAILABLE_OPTIONS_START_LINE - number_of_entries, CENTERED_LINE_TEXT_START_POSITION + database_name_offset);
+        printw("%s", temp_string.c_str());
+
+        temp_string.clear();
+        temp_string = "Page " + to_string(page_number + 1);
+        move(CENTERED_AVAILABLE_OPTIONS_START_LINE + 2, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+        printw("%s", temp_string.c_str());
 
         for(int i = 0; i < number_of_entries; i++){                                                                                                                                          
-            if(i + all_database_page_number * number_of_entries < static_cast<int>(database_vector.size())){
+            if(i + page_number * number_of_entries < static_cast<int>(database_vector.size())){
                 if(text_position == 1){ // check if text should be left side aligned or centered and write accordingly
-                    move(LINES - 4 - i, 3);    
-                    printw("%d", database_vector[i + all_database_page_number * number_of_entries].get_database_id());
-                    move(LINES - 4 - i, 20);
-                    printw("%s", database_vector[i + all_database_page_number * number_of_entries].get_database_name().c_str());                                 // ID         Name
+                    move(AVAILABLE_OPTIONS_START_LINE - i, LINE_TEXT_START_POSITION);    
+                    printw("%d", database_vector[i + page_number * number_of_entries].get_database_id());
+                    move(AVAILABLE_OPTIONS_START_LINE - i, database_name_offset);
+                    printw("%s", database_vector[i + page_number * number_of_entries].get_database_name().c_str());                                 // ID         Name
                 }else{
-                    move(LINES - 4 - i, COLS / 2 - 3 - 5 - to_string(i).length() - 5);
-                    printw("%d", database_vector[i + all_database_page_number * number_of_entries].get_database_id());
-                    move(LINES - 4 - i, COLS / 2 + 13 - database_vector[i + all_database_page_number * number_of_entries].get_database_name().length() / 2 + 5);
+                    move(AVAILABLE_OPTIONS_START_LINE - i, CENTERED_LINE_TEXT_START_POSITION - database_id_offset - to_string(i).length() - 5);
+                    printw("%d", database_vector[i + page_number * number_of_entries].get_database_id());
+                    move(AVAILABLE_OPTIONS_START_LINE - i, CENTERED_LINE_TEXT_START_POSITION + database_name_offset - database_vector[i + page_number * number_of_entries].get_database_name().length() / 2 + 5);
                     printw("%s", database_vector[i].get_database_name().c_str());                                 // ID         Name
                 }
             }
         }
-    
-    while(true){
-        if(is_paged){                                 // if there ARE pages, show the page buttons
-            move(LINES - 2, 2);
-            printw("1 - Previous Page");
-            move(LINES - 2, COLS - 15);
-            printw("3 - Next Page");
-        }
-        move(LINES - 2, COLS / 2 - 6);
-        printw("Enter - Back");
+    }
+}
 
+void Menu::print_databases_options(bool is_paged){
+    string temp_string;
+    
+    temp_string.clear();
+    temp_string = "Enter - Back";
+    move(USER_INPUT_LINE, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+    printw("%s", temp_string.c_str());
+    int offset = 5 + temp_string.length();
+    
+    if(is_paged){
+        temp_string = "1 - Previous Page";                          
+        move(USER_INPUT_LINE, CENTERED_LINE_TEXT_START_POSITION - offset - temp_string.length());
+        printw("%s", temp_string.c_str());
+
+        temp_string.clear();
+        temp_string = "3 - Next Page";
+        move(USER_INPUT_LINE, CENTERED_LINE_TEXT_START_POSITION + offset);
+        printw("%s", temp_string.c_str());
+    }
+}
+
+int Menu::available_databases_menu(){
+    bool is_empty = database_vector.empty();
+    bool is_paged = false;
+
+    if (!is_empty){                    // check if there are any databases to print
+        if(static_cast<int>(database_vector.size()) > number_of_entries) // if there IS something to display, check if you need pages
+            is_paged = true;
+    
+        print_available_databases_menu(is_empty, is_paged);
+    }else{
+        getch();
+        return 1;
+    }
+    while(true){
+        print_databases_options(is_paged);
         int input = getch();                    // wait user input
         if(check_resize())                      // check if the window was resized by the user and re-enter the menu to re-draw everything
             return 5;
@@ -846,131 +876,162 @@ int Menu::print_databases(){
             beep();
         switch (input){
         case 49:{
-            if(is_paged){                                                                                                        // if the button is shown (there are pages)
-                if(continuous_mode){                                                                                                // if Continuous Mode on
-                    if(all_database_page_number == 0){                                                                             // if on page 0
-                        all_database_page_number = static_cast<int>(database_vector.size()) / number_of_entries;                      // go to last page
-                    }else{all_database_page_number--;}                                                                             // otherwise just decrement the page number
-                }else if(all_database_page_number > 0){                                                                         // othetwise, if NOT on page 0
-                        all_database_page_number --;                                                                               // go to the previous page
-                }}else                                                                                                          // otherwise just ignore the input
-                    return 5;
+            if(is_paged)                                                                                                       // if the button is shown (there are pages)
+                increment_page();
             return 5;
         }
             
         case 10:
             return 1;
         case 51:{
-            if(is_paged){                                                                                                       // if the button is shown (there are pages)            
-                if(continuous_mode){                                                                                               // if Continuous Mode on                       
-                    if(all_database_page_number == static_cast<int>(database_vector.size()) / number_of_entries){                 // if on the last page
-                        all_database_page_number = 0;                                                                                // go to page 0
-                    }else{all_database_page_number++;}                                                                            // otherwise just increment the page number
-                }else if(all_database_page_number < static_cast<int>(database_vector.size()) / number_of_entries){             // oterwise, if NOT on the last page
-                    all_database_page_number ++;                                                                                  // go to next page
-                }}else         
-                    return 5;                                                                                                   // otherwise just ignore this input
+            if(is_paged)                                                                                                      // if the button is shown (there are pages)            
+                decrement_page();                                                                                                   // otherwise just ignore this input
             return 5;
         }  
         default:
             continue;
         }
-        }
     }
     return 1;                               // return to Manage Databases Menu
 }
 
-int Menu::print_current_database(){
-    while(true){
-        // create the outline box using the preferred decorator, write the menu name and program title
-        clear();
-        draw_main_box(decorator_type);
-        move(1, 3);
-        printw("%s", current_database.get_database_name().c_str());
-        move(1, COLS - 28);
-        printw("Terminal Database Manager");
-        draw_line(decorator_type);
-        refresh();
+void Menu::print_current_database_menu(bool is_empty, bool is_paged){
+    // create the outline box using the preferred decorator, write the menu name and program title
+    clear();
+    draw_main_box(decorator_type);
+    move(MENU_TITTLE_LINE_POSITION, LINE_TEXT_START_POSITION);
+    printw("%s", current_database.get_database_name().c_str());
+    print_program_tittle();
+    draw_line(decorator_type);
+    refresh();
+
+    string temp_string = "Database is empty. No objects to display.";
+    if(is_empty){                                                         // if the database is empty
+        move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 6, COLS / 2 - 25);
+         printw("%s", temp_string.c_str());              // tell the user there's nothing to display
+    }else{                                                                // otherwise
+                                                                          // write out the database structure
+        temp_string.clear();
+        temp_string = "ID";
+        move(AVAILABLE_OPTIONS_START_LINE - number_of_entries - 1, LINE_TEXT_START_POSITION);
+        printw("%s", temp_string.c_str());
+
+        temp_string.clear();
+        temp_string = "Name";
+        move(AVAILABLE_OPTIONS_START_LINE - number_of_entries - 1, LINE_TEXT_START_POSITION + 5); // 5 -> offset
+        printw("%s", temp_string.c_str());
+                                 
+        temp_string.clear();
+        temp_string = "Type";
+        move(AVAILABLE_OPTIONS_START_LINE - number_of_entries - 1, LINE_TEXT_START_POSITION + 50); // 50 -> offset for name
+        printw("%s", temp_string.c_str());
+                                 
+        temp_string.clear();
+        temp_string = "Quantity";
+        move(AVAILABLE_OPTIONS_START_LINE - number_of_entries - 1, LINE_TEXT_START_POSITION + 80); // 80 -> offset for type
+        printw("%s", temp_string.c_str());                                             
+
+        temp_string.clear();
+        temp_string = "Page " + to_string(page_number + 1);
+        move(CENTERED_AVAILABLE_OPTIONS_START_LINE + 2, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+        printw("%s", temp_string.c_str());
 
         vector<Object> current_database_objects = current_database.get_database_objects();
-        
-        bool is_empty = false;
-        bool is_paged = false;
-        if (current_database_objects.empty()){                                        // check if the database is empty
-            move(8, COLS / 2 - 25);
-            printw("Database is empty. No objects to display.");                      // and tell the user there's nothing to display
-            is_empty = true;
-        }else{
-            if(static_cast<int>(current_database_objects.size()) > number_of_entries) // if there IS something to display, check if you need pages
-                is_paged = true;
-
-                                                                              // and write out the database structure
-            move(LINES - 4 - number_of_entries - 1, 3);
-            printw("ID");                                                     // ID
-            move(LINES - 4 - number_of_entries - 1, 8);
-            printw("Name");                                                   //     Name
-            move(LINES - 4 - number_of_entries - 1, COLS - 10 - 50);
-            printw("Type");                                                   //                                   Type
-            move(LINES - 4 - number_of_entries - 1, COLS - 10);
-            printw("Quantity");                                               //                                                               Quantity
-
-            string page_number_string = "Page " + to_string(current_database_page_number); // Print the page number
-            move(LINES / 2, COLS / 2 - page_number_string.length() / 2);
-            printw("%s", page_number_string.c_str());
-
-            for(int i = 0; i < number_of_entries; i++){                                    // and then print the objects, as many on a page as selected by the user (number_of_entries)
-                if(i + current_database_page_number * number_of_entries < static_cast<int>(current_database_objects.size())){
-                    move(LINES - 4 - i, 3);
-                    printw("%d",current_database_objects[i + current_database_page_number * number_of_entries].get_id());
-                    move(LINES - 4 - i, 8);
-                    printw("%s",current_database_objects[i + current_database_page_number * number_of_entries].get_name().c_str());
-                    move(LINES - 4 - i, COLS - 10 - 50);
-                    printw("%s", current_database_objects[i + current_database_page_number * number_of_entries].get_type().c_str());
-                    move(LINES - 4 - i, COLS - 5 - to_string(current_database_objects[i + current_database_page_number * number_of_entries].get_quantity()).length() / 2 - 1);
-                    printw("%d", current_database_objects[i + current_database_page_number * number_of_entries].get_quantity());
-                    refresh();
-                }
+        for(int i = 0; i < number_of_entries; i++){                                    // and then print the objects, as many on a page as selected by the user (number_of_entries)
+            if(i + page_number * number_of_entries < static_cast<int>(current_database_objects.size())){
+                move(AVAILABLE_OPTIONS_START_LINE - i, LINE_TEXT_START_POSITION);
+                printw("%d",current_database_objects[i + page_number * number_of_entries].get_id());
+                move(AVAILABLE_OPTIONS_START_LINE - i, LINE_TEXT_START_POSITION + 5);
+                printw("%s",current_database_objects[i + page_number * number_of_entries].get_name().c_str());
+                move(AVAILABLE_OPTIONS_START_LINE - i, LINE_TEXT_START_POSITION + 50);
+                printw("%s", current_database_objects[i + page_number * number_of_entries].get_type().c_str());
+                move(AVAILABLE_OPTIONS_START_LINE - i, LINE_TEXT_START_POSITION + 80);
+                printw("%d", current_database_objects[i + page_number * number_of_entries].get_quantity());
+                refresh();
             }
         }
+    }
+}
 
-        // write out the menu options
-        if(is_paged){                                 // if there ARE pages, show the page buttons
-            move(LINES - 2, 2);
-            printw("1 - Previous Page");
-            move(LINES - 2, COLS - 15);
-            printw("5 - Next Page");
-        }
-        if(!is_empty){                                // if it's NOT empty, show the delete button
-            move(LINES - 2, COLS - 15 - 14 - 8 - 15);
-            printw("3 - Delete item");
-        }
+void Menu::print_current_database_menu_options(bool is_empty, bool is_paged){
+    int offset = 5;
+    int current_position = LINE_TEXT_START_POSITION + offset;
+    string temp_string;
 
-        move(LINES - 2, COLS - 15 - 21 - 8 - 15 - 15);
-        printw("2 - Add item");                      
-        
-        move(LINES - 2, COLS - 15 - 7 - 8);
-        printw("4 - Back");
-        
-        int choice = getch(); // get user input
+    if(is_paged){                                 // if there ARE pages, show the page buttons
+        temp_string.clear();
+        temp_string = "1 - Previous Page";
+        move(USER_INPUT_LINE, current_position);
+        printw("%s", temp_string.c_str());
+        current_position += offset + temp_string.length();
+    }
+
+    if(!is_empty){                                // if it's NOT empty, show the delete button
+        temp_string.clear();
+        temp_string = "3 - Delete item";
+        move(USER_INPUT_LINE, current_position);
+        printw("%s", temp_string.c_str());
+    }
+    current_position += offset + temp_string.length();
+
+    temp_string.clear();
+    temp_string = "2 - Add item";
+    move(USER_INPUT_LINE, current_position);
+    printw("%s", temp_string.c_str()); 
+    current_position += offset + temp_string.length();                    
+    
+    temp_string.clear();
+    temp_string = "4 - Back";
+    move(USER_INPUT_LINE, current_position);
+    printw("%s", temp_string.c_str());
+    current_position += offset + temp_string.length();
+
+    if(is_paged){ 
+        temp_string.clear();
+        temp_string = "5 - Next Page";
+        move(USER_INPUT_LINE, current_position);
+        printw("%s", temp_string.c_str());
+    }
+}
+
+void Menu::print_current_database_menu_delete_object_prompt(int number_of_elements_deleted){
+    if(number_of_elements_deleted > 0){
+        int final_size = current_database.get_number_of_objects();                                                       // get final number of elements
+        move(USER_INPUT_LINE, LINE_TEXT_START_POSITION);
+        printw("%d element(s) were deleted from the database! Press any key to continue...", number_of_elements_deleted); // and print the number of deleted elements
+        getch();                                                                                                         // wait user input before moving on
+    }else{
+        move(USER_INPUT_LINE, LINE_TEXT_START_POSITION);
+        printw("No element was deleted from the database! Press any key to continue...");                        // otherwise, inform the user about the problem
+        getch();                                                                                                         // and wait for user input
+    }
+}
+
+int Menu::current_database_menu(){
+    vector<Object> current_database_objects = current_database.get_database_objects();
+
+    bool is_paged = false;
+    bool is_empty = current_database_objects.empty();
+    if (!is_empty)                                                                // check if the database is empty
+        if(current_database.get_number_of_objects() > number_of_entries) // and if there are objects to display, check if you need pages
+            is_paged = true;                                                     
+
+    print_current_database_menu(is_empty, is_paged);
+    print_current_database_menu_options(is_empty, is_paged);
+
+    // determine the next step based on user input
+    while(true){
+        int choice = getch();
         if(check_resize())    // check if the window was resized by the user and re-enter the menu to re-draw everything
             return 6;
         if(sound)             // make ANNOYING sound if sound turned on
             beep();
-
-        // determine the next step based on user input
         switch (choice){
-            case 49: {                                                                                                               // 1 -> Previous page
-                if(is_paged){                                                                                                        // if the button is shown (there are pages)
-                    if(continuous_mode){                                                                                                // if Continuous Mode on
-                        if(current_database_page_number == 0){                                                                             // if on page 0
-                            current_database_page_number = current_database.get_number_of_objects() / number_of_entries;                      // go to last page
-                        }else{current_database_page_number--;}                                                                             // otherwise just decrement the page number
-                    }else if(current_database_page_number > 0){                                                                         // othetwise, if NOT on page 0
-                            current_database_page_number --;                                                                               // go to the previous page
-                    }}else                                                                                                          // otherwise just ignore the input
-                        return 6;
-                break;
-                }
+            case 49:{                                                                                                               // 1 -> Previous page
+                if(is_paged)                                                                                                        // if the button is shown (there are pages)
+                    increment_page();                                                                                                // otherwise just ignore the input
+                return 6;
+            }
             case 50:{                                                                                                                // 2 -> Add item to database
                 int status = add_object_menu();                                                                                      // call the function to add an object to the database
                 while(status == 0)
@@ -981,46 +1042,37 @@ int Menu::print_current_database(){
             }
             case 51:{                                                                                                                // 3 -> Delete item from database
                 int initial_size = current_database.get_number_of_objects();                                                         // get initial number of elements
-                int status = delete_object_menu();                                                                                   // try to delete element(s) and get confirmation
-                if(status == 1)
+                bool status = delete_object_menu();                                                                                   // try to delete element(s) and get confirmation
+                
+                if(status == 0)
                     return 6;
-                if(status == 2){                                                                                                     // if confirmed
-                    int final_size = current_database.get_number_of_objects();                                                       // get final number of elements
-                    move(LINES - 2, 3);
-                    printw("%d element(s) were deleted from the database! Press any key to continue...", initial_size - final_size); // and print the number of deleted elements
-                    getch();                                                                                                         // wait user input before moving on
-                }else if(status == 0){
-                    move(LINES - 2, 3);
-                    printw("No element was deleted from the database! Press any key to continue...");                        // otherwise, inform the user about the problem
-                    getch();                                                                                                         // and wait for user input
+                else if(status == 1){
+                    int final_size = current_database.get_number_of_objects();
+                    print_current_database_menu_delete_object_prompt(initial_size - final_size);
+                    current_database.save_database();                                                                                    // save database changes
+                    reload_database_vector();                                                                                            // and reload the vector
                 }
-                current_database.save_database();                                                                                    // save database changes
-                reload_database_vector();                                                                                            // and reload the vector
                 return 6;
             }
-            case 52:{                                                                                                                // 4 -> Back
+            case 52:{      
+                page_number = 0;                                                                                                           // 4 -> Back
                 return 3;                                                                                                            // exit loop to return to Load Database Menu
             }
-
                                                                                                                                     // TODO: Add Find & Edit button
                                                                                                                                     // TODO: Add number of elements counter to screen
                                                                                                                                     // TODO: Add number of pages to screen:    Page X/XX
 
+            
+            case 10:
+                return 3;
             case 53:{                                                                                                               // 5 -> Next page
-                if(is_paged){                                                                                                       // if the button is shown (there are pages)            
-                    if(continuous_mode){                                                                                               // if Continuous Mode on                       
-                        if(current_database_page_number == current_database.get_number_of_objects() / number_of_entries){                 // if on the last page
-                            current_database_page_number = 0;                                                                                // go to page 0
-                        }else{current_database_page_number++;}                                                                            // otherwise just increment the page number
-                    }else if(current_database_page_number < current_database.get_number_of_objects() / number_of_entries){             // oterwise, if NOT on the last page
-                        current_database_page_number ++;                                                                                  // go to next page
-                    }}else         
-                        return 6;                                                                                                   // otherwise just ignore this input
-                break;
-            }
-            default:{                                                                                                               // ignore other inputs
+                if(is_paged)                                                                                                       // if the button is shown (there are pages)            
+                    decrement_page();
                 return 6;
-            }    
+            }
+            default:                                                                                                               // ignore other inputs
+                continue;
+               
         }
     }
 
@@ -1029,30 +1081,53 @@ int Menu::print_current_database(){
     return 3;                         // return to load database menu
 }
 
+void Menu::print_add_object_menu(){
+    // create the outline box using the preferred decorator, write the menu name and program title
+    clear();
+    draw_main_box(decorator_type);
+    move(MENU_TITTLE_LINE_POSITION, LINE_TEXT_START_POSITION);
+    printw("Add Object Menu");
+    print_program_tittle();
+    draw_line(decorator_type);                                        // draw the bottom line
+    
+    string temp_string;
+    // inform the user as to how to create new objects
+    move(LINES / 2 - 4, COLS / 2 - 23);
+    printw( "Objects are created using the following format:");
+
+    temp_string.clear();
+    temp_string = "**********************";
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 5, LAST_COLUMN_OF_TEXT - temp_string.length() - 2); // 2 -> little space between * and border
+    printw("%s", temp_string.c_str());
+
+    temp_string.clear();
+    temp_string = "name type quantity";
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 4, LAST_COLUMN_OF_TEXT - temp_string.length() - 4); // 4 -> little space between text and border
+    printw("%s", temp_string.c_str());
+
+    temp_string.clear();
+    temp_string = "**********************";
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 3, LAST_COLUMN_OF_TEXT - temp_string.length() - 2); // 2 -> little space between * and border
+    printw("%s", temp_string.c_str());
+
+    temp_string.clear();
+    temp_string = "Leave blank and press Enter to cancel and go back";
+    move(AVAILABLE_OPTIONS_START_LINE, LINE_TEXT_START_POSITION);
+    printw("%s", temp_string.c_str());
+    
+    move(USER_INPUT_LINE, LINE_TEXT_START_POSITION);
+}
+
+void Menu::print_add_object_result(bool result){
+    if(result)
+        printw("Object added to the database!");
+    else
+        printw("Invalid object! Please make sure to follow the correct format!"); 
+}
+
 int Menu::add_object_menu(){
+    print_add_object_menu();
     while(true){
-        // create the outline box using the preferred decorator, write the menu name and program title
-        clear();
-        draw_main_box(decorator_type);
-        move(1,3);
-        printw("Add Object");
-        move(1, COLS - 28);
-        printw("Terminal Database Manager");
-        move(LINES / 2 - 4, COLS / 2 - 23);
-
-        // inform the user as to how to create new objects
-        printw( "Objects are created using the following format:");
-        move(LINES / 2 - 5, COLS - 30);
-        printw( "**********************");
-        move(LINES / 2 - 4, COLS - 28);
-        printw( "name type quantity");
-        move(LINES / 2 - 3, COLS - 30);
-        printw( "**********************");
-        move(LINES - 4, 3);
-        printw("Leave blank and press Enter to cancel and go back");
-        draw_line(decorator_type);                                        // draw the bottom line
-        move(LINES - 2, 3);
-
         echo();                              // enable echo 
         nocbreak();                          // enable buffering
         char object[256];
@@ -1075,45 +1150,98 @@ int Menu::add_object_menu(){
         while(getline(new_object, temp_object_feature, ' '))                          // so long as there are features to remove from that input line
             temp_object.push_back(temp_object_feature);                               // extract them into a vector
  
+        bool result = false;
         try{                                                                          // then try to create an object with them
             string temp_name = temp_object[0];
             string temp_type = temp_object[1];
             int temp_quantity = std::stoi(temp_object[2]);
 
-            current_database.add_object(temp_name, temp_type, temp_quantity);         // and add it to the database object vector
+            result = current_database.add_object(temp_name, temp_type, temp_quantity);         // and add it to the database object vector
 
-            printw("Object added to the database!");                                  // finally tell the user that the object was added to the database (never really shown cuz no getch() to pause)
-            break;
+            
+                                              // finally tell the user that the object was added to the database (never really shown cuz no getch() to pause)
         }catch(int errorCode){                                                        // if not possible, tell the user to carefully follow the format
-            printw("Invalid object! Please make sure to follow the correct format!"); 
+            print_add_object_result(result);
+            break;
         }
+        print_add_object_result(result);
+        break;
     }
     return 1;
 }
 
-int Menu::delete_object_menu(){
+void Menu::print_delete_object_menu(){
     // print on top of the database menu
-    move(3,3);
-    printw("Delete by...");
-    move(1, COLS - 28);
-    printw("Terminal Database Manager");
-    move(5, 3);
-    printw("1. ID");
-    move(6, 3);
-    printw("2. Name");
-    move(7, 3);
-    printw("3. Type");
-    move(10, 3);
-    printw("WARNING!!!");
-    move(11, 3);
-    printw("All matching objects will be deleted!!!");
-    move(13, 3);        
-    printw("Press Enter to cancel and go back.");
+    string temp_string = "Delete by...";
+    move(MENU_TITTLE_LINE_POSITION + 2, LINE_TEXT_START_POSITION);
+    printw("%s", temp_string.c_str());
+
+    temp_string = "1. ID";
+    move(MENU_TITTLE_LINE_POSITION + 4, LINE_TEXT_START_POSITION);
+    printw("%s", temp_string.c_str());
+
+    temp_string = "2. Name";
+    move(MENU_TITTLE_LINE_POSITION + 5, LINE_TEXT_START_POSITION);
+    printw("%s", temp_string.c_str());
+
+    temp_string = "3. Type";
+    move(MENU_TITTLE_LINE_POSITION + 6, LINE_TEXT_START_POSITION);
+    printw("%s", temp_string.c_str());
+
+    temp_string = "WARNING!!!";
+    move(MENU_TITTLE_LINE_POSITION + 9, LINE_TEXT_START_POSITION);
+    printw("%s", temp_string.c_str());
+
+    temp_string = "All matching objects will be deleted!!!";
+    move(MENU_TITTLE_LINE_POSITION + 10, LINE_TEXT_START_POSITION);
+    printw("%s", temp_string.c_str());
+
+    temp_string = "Press Enter to cancel and go back.";
+    move(MENU_TITTLE_LINE_POSITION + 12, LINE_TEXT_START_POSITION);        
+    printw("%s", temp_string.c_str());
+
     refresh();
     
-    move(LINES - 2, 2);
-    for(int i = 2; i < COLS - 1; i++)
+    move(USER_INPUT_LINE, LINE_TEXT_START_POSITION);
+    for(int i = LINE_TEXT_START_POSITION; i < COLS - LINE_TEXT_START_POSITION; i++)
         printw(" ");
+}
+
+void Menu::print_delete_by_id(){
+    string temp_string = "Delete by ID";
+    move(MENU_TITTLE_LINE_POSITION + 2, LINE_TEXT_START_POSITION);
+    printw("%s", temp_string.c_str());
+
+    temp_string = "ID of the item to delete: ";
+    move(USER_INPUT_LINE, LINE_TEXT_START_POSITION);
+    printw("%s", temp_string.c_str());
+    refresh();
+}
+
+void Menu::print_delete_by_name(){
+    string temp_string = "Delete by Name";
+    move(MENU_TITTLE_LINE_POSITION + 2, LINE_TEXT_START_POSITION);
+    printw("%s", temp_string.c_str());
+
+    temp_string = "Name of the item to delete: ";
+    move(USER_INPUT_LINE, LINE_TEXT_START_POSITION);
+    printw("%s", temp_string.c_str());
+    refresh();
+}
+
+void Menu::print_delete_by_type(){
+    string temp_string = "Delete by Type";
+    move(MENU_TITTLE_LINE_POSITION + 2, LINE_TEXT_START_POSITION);
+    printw("%s", temp_string.c_str());
+
+    temp_string = "Type of the item to delete: ";
+    move(USER_INPUT_LINE, LINE_TEXT_START_POSITION);
+    printw("%s", temp_string.c_str());
+    refresh();
+}
+
+bool Menu::delete_object_menu(){
+    print_delete_object_menu();
     
     int choice = getch(); // get user input
     if(check_resize())    // check if the window was resized by the user and re-enter the menu to re-draw everything
@@ -1126,11 +1254,7 @@ int Menu::delete_object_menu(){
 
     switch(choice){
     case 49:{                                                                   // 1 -> delete objects by id
-        move(3,3);
-        printw("Delete by ID");
-        move(LINES - 2, 3);
-        printw("ID of the item to delete: ");
-        refresh();
+        print_delete_by_id();
 
         echo();                                                                 // echo on
         nocbreak();                                                             // buffering on
@@ -1153,10 +1277,7 @@ int Menu::delete_object_menu(){
         return is_confirmed;                                                    // return the answser
     }
     case 50:{                                                                   // 2 -> delete objects by name
-        move(1,3);
-        printw("Delete by Name");
-        move(LINES - 2, 3);
-        printw("Name of the item to delete: ");
+        print_delete_by_name();
 
         echo();                                                                 // echo on
         nocbreak();                                                             // buffering on
@@ -1180,10 +1301,7 @@ int Menu::delete_object_menu(){
         return is_confirmed;
     }
     case 51:{                                                                   // 3 -> delete objects by type
-        move(1,3);
-        printw("Delete by Type");
-        move(LINES - 2, 3);
-        printw("Type of the item to delete: ");
+        print_delete_by_type();
 
         echo();                                                                 // echo on
         nocbreak();                                                             // buffering on
@@ -1204,64 +1322,312 @@ int Menu::delete_object_menu(){
 
         bool is_confirmed = current_database.delete_object(string_to_find);     // try to delete and get confirmation
         if(is_confirmed)
-            return 2;                                                           // return confirmation
+            return 1;                                                           // return confirmation
     }}
 
     return 0;
 }
 
-int Menu::settings(){
+void Menu::print_settings_menu(){
+    // create the outline box using the preferred decorator, write the menu name and program title
+    clear();
+    draw_main_box(decorator_type);
+    move(MENU_TITTLE_LINE_POSITION, LINE_TEXT_START_POSITION);
+    printw("Settings");
+    print_program_tittle();
+    draw_line(decorator_type);                      // draw the bottom line
+
+    // write out the menu options, infos and warnings
+    string temp_string = "1. Decorator type";
+    if(text_position == 1)                          // check if text should be left side aligned or centered and write accordingly
+        move(AVAILABLE_OPTIONS_START_LINE - 5, LINE_TEXT_START_POSITION);
+    else
+        move(AVAILABLE_OPTIONS_START_LINE - 5, CENTERED_LINE_TEXT_START_POSITION - 18);
+    printw("%s", temp_string.c_str());
+
+    temp_string = "2. Text position";
+    if(text_position == 1)                          // check if text should be left side aligned or centered and write accordingly
+        move(AVAILABLE_OPTIONS_START_LINE - 4, LINE_TEXT_START_POSITION);
+    else
+        move(AVAILABLE_OPTIONS_START_LINE - 4, CENTERED_LINE_TEXT_START_POSITION - 18);
+    printw("%s", temp_string.c_str());
+
+    temp_string = "3. Sound";
+    if(text_position == 1)                          // check if text should be left side aligned or centered and write accordingly
+        move(AVAILABLE_OPTIONS_START_LINE - 3, LINE_TEXT_START_POSITION);
+    else
+        move(AVAILABLE_OPTIONS_START_LINE - 3, CENTERED_LINE_TEXT_START_POSITION - 18);
+    printw("%s", temp_string.c_str());
+
+    temp_string = "4. Number of entries";
+    if(text_position == 1)                          // check if text should be left side aligned or centered and write accordingly
+        move(AVAILABLE_OPTIONS_START_LINE - 2, LINE_TEXT_START_POSITION);
+    else
+        move(AVAILABLE_OPTIONS_START_LINE - 2, CENTERED_LINE_TEXT_START_POSITION - 18);
+    printw("%s", temp_string.c_str());
+
+    temp_string = "5. Continuous mode";
+    if(text_position == 1)                          // check if text should be left side aligned or centered and write accordingly
+        move(AVAILABLE_OPTIONS_START_LINE - 1, LINE_TEXT_START_POSITION);
+    else
+        move(AVAILABLE_OPTIONS_START_LINE - 1, CENTERED_LINE_TEXT_START_POSITION - 18);
+    printw("%s", temp_string.c_str());
+
+    temp_string = "6. Save settings";
+    if(text_position == 1)                          // check if text should be left side aligned or centered and write accordingly
+        move(AVAILABLE_OPTIONS_START_LINE, LINE_TEXT_START_POSITION);
+    else
+        move(AVAILABLE_OPTIONS_START_LINE, CENTERED_LINE_TEXT_START_POSITION - 18);
+    printw("%s", temp_string.c_str());
+
+    temp_string = "Press Enter to go back to main menu.";
+    if(text_position == 1)                          // check if text should be left side aligned or centered and write accordingly
+        move(USER_INPUT_LINE, LINE_TEXT_START_POSITION);
+    else
+        move(USER_INPUT_LINE, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+    printw("%s", temp_string.c_str());
+    refresh();
+}
+
+void Menu::print_decorator_settings(){
+    move(AVAILABLE_OPTIONS_START_LINE - 5, LINE_TEXT_START_POSITION);
+    for(int i = 0; i < 17; i++)
+        printw(" ");
+    
+    string temp_string = "Decorator Type:";
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 4, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+    printw("%s", temp_string.c_str());
+
+    temp_string = "1. *";
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 4, LAST_COLUMN_OF_TEXT - 37);
+    printw("%s", temp_string.c_str());
+
+    temp_string = "2. ~";
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 3, LAST_COLUMN_OF_TEXT - 37);
+    printw("%s", temp_string.c_str());
+
+    temp_string = "3. +";
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 2, LAST_COLUMN_OF_TEXT - 37);
+    printw("%s", temp_string.c_str());
+
+    temp_string = "4. /";
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 1, LAST_COLUMN_OF_TEXT - 37);
+    printw("%s", temp_string.c_str());
+
+    temp_string = "(Current)";
+    switch (decorator_type){                // show which is the currently selected option
+    case '*':
+        move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 4, LAST_COLUMN_OF_TEXT - 36 + temp_string.length() / 2);
+        break;
+    case '~':
+        move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 3, LAST_COLUMN_OF_TEXT - 36 + temp_string.length() / 2);
+        break;
+    case '+':
+        move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 2, LAST_COLUMN_OF_TEXT - 36 + temp_string.length() / 2);
+        break;
+    case '/':
+        move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 1, LAST_COLUMN_OF_TEXT - 36 + temp_string.length() / 2);
+        break;
+    }
+    printw("%s", temp_string.c_str());
+
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 5, CENTERED_LINE_TEXT_START_POSITION - 10);
+    for(int i = 0; i < 19; i++)
+        printw("*");
+
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 3, CENTERED_LINE_TEXT_START_POSITION - 10);
+    for(int i = 0; i < 19; i++)
+        printw("*");
+
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 5, LAST_COLUMN_OF_TEXT - 39);
+    for(int i = 0; i < 18; i++)
+        printw("*");
+    
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE, LAST_COLUMN_OF_TEXT - 39);
+    for(int i = 0; i < 18; i++)
+        printw("*");
+}
+
+void Menu::print_text_position_settings(){
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 4, LINE_TEXT_START_POSITION);
+    for(int i = 0; i < 16; i++)
+        printw(" ");
+    
+    string temp_string = "Text position:";
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 4, CENTERED_LINE_TEXT_START_POSITION - 7);
+    printw("%s", temp_string.c_str());
+
+    temp_string = "1. Left side";
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 4, LAST_COLUMN_OF_TEXT - 37);
+    printw("%s", temp_string.c_str());
+
+    temp_string = "2. Centered";
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 3, LAST_COLUMN_OF_TEXT - 37);
+    printw("%s", temp_string.c_str());
+    
+    temp_string = "(Current)";
+    if(text_position)                       // show which is the currently selected option
+        move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 4, LAST_COLUMN_OF_TEXT - 24);                
+    else
+        move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 3, LAST_COLUMN_OF_TEXT - 24);
+    printw("%s", temp_string.c_str());
+    
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 5, CENTERED_LINE_TEXT_START_POSITION - 9);
+    for(int i = 0; i < 18; i++)
+        printw("*");
+
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 3, CENTERED_LINE_TEXT_START_POSITION - 9);
+    for(int i = 0; i < 18; i++)
+        printw("*");
+
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 5, LAST_COLUMN_OF_TEXT - 39);
+    for(int i = 0; i < 26; i++)
+        printw("*");
+    
+    move (CENTERED_AVAILABLE_OPTIONS_START_LINE - 2, LAST_COLUMN_OF_TEXT - 39);
+    for(int i = 0; i < 26; i++)
+        printw("*");
+}
+
+void Menu::print_sound_settings(){
+    move(AVAILABLE_OPTIONS_START_LINE - 3, LINE_TEXT_START_POSITION);
+    for(int i = 0; i < 8; i++)
+        printw(" ");
+
+    string temp_string = "Sound:";
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 4, CENTERED_LINE_TEXT_START_POSITION - 2);
+    printw("%s", temp_string.c_str());
+
+    temp_string = "1. ON";
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 4, LAST_COLUMN_OF_TEXT - 37);
+    printw("%s", temp_string.c_str());
+
+    temp_string = "2. OFF";
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 3, LAST_COLUMN_OF_TEXT - 37);
+    printw("%s", temp_string.c_str());
+
+    temp_string = "(Current)";
+    if(sound){                              // show which is the currently selected option
+        move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 4, LAST_COLUMN_OF_TEXT - 30);
+    }else{
+        move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 3, LAST_COLUMN_OF_TEXT - 30);
+    }
+    printw("%s", temp_string.c_str());
+
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 5, CENTERED_LINE_TEXT_START_POSITION - 4);
+    for(int i = 0; i < 10; i++)
+        printw("*");
+
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 3, CENTERED_LINE_TEXT_START_POSITION - 4);
+    for(int i = 0; i < 10; i++)
+        printw("*");
+
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 5, LAST_COLUMN_OF_TEXT - 39);
+    for(int i = 0; i < 20; i++)
+        printw("*");
+    
+    move (CENTERED_AVAILABLE_OPTIONS_START_LINE - 2, LAST_COLUMN_OF_TEXT - 39);
+    for(int i = 0; i < 20; i++)
+        printw("*");
+}
+
+void Menu::print_number_of_entries_settings(){
+    move(AVAILABLE_OPTIONS_START_LINE - 2, LINE_TEXT_START_POSITION);
+    for(int i = 0; i < 20; i++)
+        printw(" ");
+    
+    string temp_string = "Number of entries:";
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 4, CENTERED_LINE_TEXT_START_POSITION - 9);
+    printw("%s", temp_string.c_str());
+
+    temp_string = "1. 3 Entries per page";
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 4, LAST_COLUMN_OF_TEXT - 37);
+    printw("%s", temp_string.c_str());
+
+    temp_string = "2. 5 Entries per page";
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 3, LAST_COLUMN_OF_TEXT - 37);
+    printw("%s", temp_string.c_str());
+
+    temp_string = "3. 7 Entries per page";
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 2, LAST_COLUMN_OF_TEXT - 37);
+    printw("%s", temp_string.c_str());
+
+    temp_string = "(Current)";
+    switch (number_of_entries){              // show which is the currently selected option
+    case 3:
+        move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 4, LAST_COLUMN_OF_TEXT - 15);
+        break;
+    case 5:
+        move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 3, LAST_COLUMN_OF_TEXT - 15);
+        break;
+    case 7:
+        move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 2, LAST_COLUMN_OF_TEXT - 15);
+        break;
+    }
+    printw("%s", temp_string.c_str());
+
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 5, CENTERED_LINE_TEXT_START_POSITION - 11);
+    for(int i = 0; i < 22; i++)
+        printw("*");
+
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 3, CENTERED_LINE_TEXT_START_POSITION - 11);
+    for(int i = 0; i < 22; i++)
+        printw("*");
+
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 5, LAST_COLUMN_OF_TEXT - 39);
+    for(int i = 0; i < 35; i++)
+        printw("*");
+    
+    move (CENTERED_AVAILABLE_OPTIONS_START_LINE - 1, LAST_COLUMN_OF_TEXT - 39);
+    for(int i = 0; i < 35; i++)
+        printw("*");
+}
+
+void Menu::print_continuous_mode_settings(){
+    move(AVAILABLE_OPTIONS_START_LINE - 1, LINE_TEXT_START_POSITION);
+    for(int i = 0; i < 18; i++)
+        printw(" ");
+    
+    string temp_string = "Continuous mode:";
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 4, CENTERED_LINE_TEXT_START_POSITION - 8);
+    printw("%s", temp_string.c_str());
+
+    temp_string = "1. ON";
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 4, LAST_COLUMN_OF_TEXT - 37);
+    printw("%s", temp_string.c_str());
+
+    temp_string = "2. OFF";
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 3, LAST_COLUMN_OF_TEXT - 37);
+    printw("%s", temp_string.c_str());
+    
+    temp_string = "(Current)";
+    if(continuous_mode)                    // show which is the currently selected option
+        move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 4, LAST_COLUMN_OF_TEXT - 30);
+    else
+        move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 3, LAST_COLUMN_OF_TEXT - 30);
+    printw("%s", temp_string.c_str());
+ 
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 5, CENTERED_LINE_TEXT_START_POSITION - 10);
+    for(int i = 0; i < 20; i++)
+        printw("*");
+ 
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 3, CENTERED_LINE_TEXT_START_POSITION - 10);
+    for(int i = 0; i < 20; i++)
+        printw("*");
+ 
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 5, LAST_COLUMN_OF_TEXT - 39);
+    for(int i = 0; i < 20; i++)
+        printw("*");
+    
+    move (CENTERED_AVAILABLE_OPTIONS_START_LINE - 2, LAST_COLUMN_OF_TEXT - 39);
+    for(int i = 0; i < 20; i++)
+        printw("*");
+
+}
+
+int Menu::settings_menu(){
+    print_settings_menu();
     while(true){
-        // create the outline box using the preferred decorator, write the menu name and program title
-        clear();
-        draw_main_box(decorator_type);
-        move(1,3);
-        printw("Settings");
-        move(1, COLS - 28);
-        printw("Terminal Database Manager");
-
-        // write out the menu options, infos and warnings
-        if(text_position == 1)                          // check if text should be left side aligned or centered and write accordingly
-            move(LINES - 9, 3);
-        else
-            move(LINES - 9, COLS / 2 - 8);
-        printw("1. Decorator type");
-        if(text_position == 1)                          // check if text should be left side aligned or centered and write accordingly
-            move(LINES - 8, 3);
-        else
-            move(LINES - 8, COLS / 2 - 8);
-        printw("2. Text position");
-        if(text_position == 1)                          // check if text should be left side aligned or centered and write accordingly
-            move(LINES - 7, 3);
-        else
-            move(LINES - 7, COLS / 2 - 4);
-        printw("3. Sound");
-        if(text_position == 1)                          // check if text should be left side aligned or centered and write accordingly
-            move(LINES - 6, 3);
-        else
-            move(LINES - 6, COLS / 2 - 10);
-        printw("4. Number of entries");
-        if(text_position == 1)                          // check if text should be left side aligned or centered and write accordingly
-            move(LINES - 5, 3);
-        else
-            move(LINES - 5, COLS / 2 - 9);
-        printw("5. Continuous mode");
-        if(text_position == 1)                          // check if text should be left side aligned or centered and write accordingly
-            move(LINES - 4, 3);
-        else
-            move(LINES - 4, COLS / 2 - 8);
-        printw("6. Save settings");
-
-        draw_line(decorator_type);                      // draw the bottom line
-        if(text_position == 1)                          // check if text should be left side aligned or centered and write accordingly
-            move(LINES - 2, 3);
-        else
-            move(LINES - 2, COLS / 2 - 18);
-        printw("Press Enter to go back to main menu.");
-        refresh();
-        if(check_resize())                              // check if the window was resized by the user and re-enter the menu to re-draw everything
-            return 7;
-
         int choice = getch(); // wait user input
         if(check_resize())    // check if the window was resized by the user and re-enter the menu to re-draw everything
             return 7;
@@ -1271,65 +1637,9 @@ int Menu::settings(){
         // determine the next step based on user input
         switch (choice){
         case 49:{                              // Change decorator type
-            move(LINES - 9, 3);
-            for(int i = 0; i < 17; i++)
-                printw(" ");
-            move(LINES / 2 - 4, COLS / 2 - 8);
-            printw("Decorator Type:");
-            move(LINES / 2 - 4, COLS - 38);
-            printw("1. *");
-            move(LINES / 2 - 3, COLS - 38);
-            printw("2. ~");
-            move(LINES / 2 - 2, COLS - 38);
-            printw("3. +");
-            move(LINES / 2 - 1, COLS - 38);
-            printw("4. /");
+            print_decorator_settings();
 
-            switch (decorator_type){                // show which is the currently selected option
-            case '*':
-                move(LINES / 2 - 4, COLS - 38 + 6);
-                printw("(Current)");
-                break;
-            case '~':
-                move(LINES / 2 - 3, COLS - 38 + 6);
-                printw("(Current)");
-                break;
-            case '+':
-                move(LINES / 2 - 2, COLS - 38 + 6);
-                printw("(Current)");
-                break;
-            case '/':
-                move(LINES / 2 - 1, COLS - 38 + 6);
-                printw("(Current)");
-                break;
-            }
-
-            move(LINES / 2 - 5, COLS / 2 - 10);
-            for(int i = 0; i < 19; i++)
-                printw("*");
-
-            move(LINES / 2 - 3, COLS / 2 - 10);
-            for(int i = 0; i < 19; i++)
-                printw("*");
-
-            move(LINES / 2 - 5, COLS - 40);
-            for(int i = 0; i < 18; i++)
-                printw("*");
-            
-            move (LINES / 2, COLS - 40);
-            for(int i = 0; i < 18; i++)
-                printw("*");
-            
-
-            int decorator_choice = getch(); // get user input
-            if(check_resize())              // check if the window was resized by the user and re-enter the menu to re-draw everything
-            return 7;
-            if(sound)                       // make ANNOYING sound if sound turned on
-                beep();
-
-            if(decorator_choice == 10)      // if the user pressed Enter, go back
-                break;
-
+            int decorator_choice = 0;
             while(decorator_choice  != 49 && decorator_choice != 50 && decorator_choice != 51 && decorator_choice != 52){ // until the user pressed a valid key, keep them trapped in an infinite loop
                 decorator_choice = getch();                                                                               // wait user input
                 if(check_resize())                                                                                        // check if the window was resized by the user and re-enter the menu to re-draw everything
@@ -1354,105 +1664,41 @@ int Menu::settings(){
                 decorator_type = '/';
                 break;
             }
-            break;
+            return 7;
         }
         case 50:{                              // Change text alignment 
-            move(LINES - 8, 3);
-            for(int i = 0; i < 16; i++)
-                printw(" ");
-            move(LINES / 2 - 4, COLS / 2 - 7);
-            printw("Text position:");
-            move(LINES / 2 - 4, COLS - 38);
-            printw("1. Left side");
-            move(LINES / 2 - 3, COLS - 38);
-            printw("2. Centered");
-            
-            if(text_position){                       // show which is the currently selected option
-                move(LINES / 2 - 4, COLS - 38 + 14);                
-                printw("(Current)");
-            }else{
-                move(LINES / 2 - 3, COLS - 38 + 13);
-                printw("(Current)");
-            }
-            
-            move(LINES / 2 - 5, COLS / 2 - 9);
-            for(int i = 0; i < 18; i++)
-                printw("*");
+            print_text_position_settings();
 
-            move(LINES / 2 - 3, COLS / 2 - 9);
-            for(int i = 0; i < 18; i++)
-                printw("*");
-
-            move(LINES / 2 - 5, COLS - 40);
-            for(int i = 0; i < 26; i++)
-                printw("*");
-            
-            move (LINES / 2 - 2, COLS - 40);
-            for(int i = 0; i < 26; i++)
-                printw("*");
-
-            int text_choice = getch();                      // get user input
-            if(check_resize())                              // check if the window was resized by the user and re-enter the menu to re-draw everything
-            return 7;
-            if(sound)                                       // make ANNOYING sound if sound turned on 
+            int text_choice = getch();
+            if(check_resize())                                // check if the window was resized by the user and re-enter the menu to re-draw everything
+                return 7;
+            if(sound)                                         // make ANNOYING sound if sound turned on
                 beep();
+            
+            if(text_choice == 10)
+                return 7;
+            else
+                while(text_choice  != 49 && text_choice != 50){ // until the user pressed a valid key, keep them trapped in an infinite loop
+                    text_choice = getch();                      // wait user input
+                    if(check_resize())                          // check if the window was resized by the user and re-enter the menu to re-draw everything
+                        return 7;
+                    if(sound)                                   // make ANNOYING sound if sound turned on
+                        beep();
 
-            if(text_choice == 10)                           // if the user pressed Enter, go back
-                break;
-
-            while(text_choice  != 49 && text_choice != 50){ // until the user pressed a valid key, keep them trapped in an infinite loop
-                text_choice = getch();                      // wait user input
-                if(check_resize())                          // check if the window was resized by the user and re-enter the menu to re-draw everything
-                    return 7;
-                if(sound)                                   // make ANNOYING sound if sound turned on
-                    beep();
-
-                if(text_choice == 10)                       // if the user pressed Enter, go back and free them
-                    break;                                  
-            }
+                    if(text_choice == 10)                       // if the user pressed Enter, go back and free them
+                        return 7;                                  
+                }
 
             // determine the next step based on user input
-            if(text_choice == 49)      // if 1, align the text left side
-                text_position = true;
-            else                       // otherwise, center the text
+            if(text_choice == 50)      // if 1, align the text left side
                 text_position = false;
-            break;                  
+            else                       // otherwise, center the text
+                text_position = true;
+            return 7;                  
         }
         case 51:{                              // Turn *annoying* Sound ON/OFF
-            move(LINES - 7, 3);
-            for(int i = 0; i < 8; i++)
-                printw(" ");
-            move(LINES / 2 - 4, COLS / 2 - 2);
-            printw("Sound:");
-            move(LINES / 2 - 4, COLS - 38);
-            printw("1. ON");
-            move(LINES / 2 - 3, COLS - 38);
-            printw("2. OFF");
-
-            if(sound){                              // show which is the currently selected option
-                move(LINES / 2 - 4, COLS - 38 + 7);
-                printw("(Current)");
-            }else{
-                move(LINES / 2 - 3, COLS - 38 + 8);
-                printw("(Current)");
-            }
-
-            move(LINES / 2 - 5, COLS / 2 - 4);
-            for(int i = 0; i < 10; i++)
-                printw("*");
-
-            move(LINES / 2 - 3, COLS / 2 - 4);
-            for(int i = 0; i < 10; i++)
-                printw("*");
-
-            move(LINES / 2 - 5, COLS - 40);
-            for(int i = 0; i < 20; i++)
-                printw("*");
+            print_sound_settings();
             
-            move (LINES / 2 - 2, COLS - 40);
-            for(int i = 0; i < 20; i++)
-                printw("*");
-
             int sound_choice = getch();                       // get user input
             if(check_resize())                                // check if the window was resized by the user and re-enter the menu to re-draw everything
                 return 7;
@@ -1460,70 +1706,29 @@ int Menu::settings(){
                 beep();
 
             if(sound_choice == 10)                            // if the user pressed Enter, go back
-                break;
+                return 7;
+            else
+                while(sound_choice  != 49 && sound_choice != 50){ // until the user pressed a valid key, keep them trapped in an infinite loop
+                    sound_choice = getch();                       // wait user input
+                    if(check_resize())                            // check if the window was resized by the user and re-enter the menu to re-draw everything
+                        return 7;
+                    if(sound)                                     // make ANNOYING sound if sound turned on
+                        beep();
 
-            while(sound_choice  != 49 && sound_choice != 50){ // until the user pressed a valid key, keep them trapped in an infinite loop
-                sound_choice = getch();                       // wait user input
-                if(check_resize())                            // check if the window was resized by the user and re-enter the menu to re-draw everything
-                    return 7;
-                if(sound)                                     // make ANNOYING sound if sound turned on
-                    beep();
-
-                if(sound_choice == 10)                        // if the user pressed Enter, go back and free them
-                    break;
-            }
+                    if(sound_choice == 10)                        // if the user pressed Enter, go back and free them
+                        return 7;
+                }
 
             // determine the next step based on user input
             if(sound_choice == 49) // if 1, turn on *annoying* sound
                 sound = true;
             else                   // otherwise, turn it off *blessed silence*
                 sound = false;
-            break;
+            return 7;
         }
         case 52:{                              // Change number of entries per page
-            move(LINES - 6, 3);
-            for(int i = 0; i < 20; i++)
-                printw(" ");
-            move(LINES / 2 - 4, COLS / 2 - 9);
-            printw("Number of entries:");
-            move(LINES / 2 - 4, COLS - 38);
-            printw("1. 3 Entries per page");
-            move(LINES / 2 - 3, COLS - 38);
-            printw("2. 5 Entries per page");
-            move(LINES / 2 - 2, COLS - 38);
-            printw("3. 7 Entries per page");
-
-            switch (number_of_entries){              // show which is the currently selected option
-            case 3:
-                move(LINES / 2 - 4, COLS - 38 + 23);
-                printw("(Current)");
-                break;
-            case 5:
-                move(LINES / 2 - 3, COLS - 38 + 23);
-                printw("(Current)");
-                break;
-            case 7:
-                move(LINES / 2 - 2, COLS - 38 + 23);
-                printw("(Current)");
-                break;
-            }
-
-            move(LINES / 2 - 5, COLS / 2 - 11);
-            for(int i = 0; i < 22; i++)
-                printw("*");
-
-            move(LINES / 2 - 3, COLS / 2 - 11);
-            for(int i = 0; i < 22; i++)
-                printw("*");
-
-            move(LINES / 2 - 5, COLS - 40);
-            for(int i = 0; i < 35; i++)
-                printw("*");
+            print_number_of_entries_settings();
             
-            move (LINES / 2 - 1, COLS - 40);
-            for(int i = 0; i < 35; i++)
-                printw("*");
-
             int entries_choice = getch(); // get user input
             if(check_resize())            // check if the window was resized by the user and re-enter the menu to re-draw everything
                 return 7;
@@ -1531,7 +1736,7 @@ int Menu::settings(){
                 beep();
 
             if(entries_choice == 10)      // if the user pressed Enter, go back
-                break;
+                return 7;
 
             while(entries_choice  != 49 && entries_choice != 50 && entries_choice != 51){ // until the user pressed a valid key, keep them trapped in an infinite loop
                 entries_choice = getch();                                                 // wait user input
@@ -1541,7 +1746,7 @@ int Menu::settings(){
                     beep();
 
                 if(entries_choice == 10)                                                  // if the user pressed Enter, go back and free them
-                    break;
+                    return 7;
             }
 
             // determine the next step based on user input
@@ -1555,7 +1760,7 @@ int Menu::settings(){
             case 51:                   // if 3, change number of entries to 7
                 number_of_entries = 7;
             }
-            break;
+            return 7;
         }
 
         // TODO: ADD COMPACT MODE!
@@ -1617,40 +1822,8 @@ int Menu::settings(){
         //     break;
         // }
         case 53:{                              // Turn Continuous Mode ON/OFF
-            move(LINES - 5, 3);
-            for(int i = 0; i < 18; i++)
-                printw(" ");
-            move(LINES / 2 - 4, COLS / 2 - 8);
-            printw("Continuous mode:");
-            move(LINES / 2 - 4, COLS - 38);
-            printw("1. ON");
-            move(LINES / 2 - 3, COLS - 38);
-            printw("2. OFF");
+            print_continuous_mode_settings();
             
-            if(continuous_mode){                    // show which is the currently selected option
-                move(LINES / 2 - 4, COLS - 38 + 8);
-                printw("(Current)");
-            }else{
-                move(LINES / 2 - 3, COLS - 38 + 7);
-                printw("(Current)");
-            }
-
-            move(LINES / 2 - 5, COLS / 2 - 10);
-            for(int i = 0; i < 20; i++)
-                printw("*");
-
-            move(LINES / 2 - 3, COLS / 2 - 10);
-            for(int i = 0; i < 20; i++)
-                printw("*");
-
-            move(LINES / 2 - 5, COLS - 40);
-            for(int i = 0; i < 20; i++)
-                printw("*");
-            
-            move (LINES / 2 - 2, COLS - 40);
-            for(int i = 0; i < 20; i++)
-                printw("*");
-
             int continuous_choice = getch(); // get user input 
             if(check_resize())               // check if the window was resized by the user and re-enter the menu to re-draw everything
                 return 7;
@@ -1658,7 +1831,7 @@ int Menu::settings(){
                 beep();
 
             if(continuous_choice == 10)      // if the user pressed Enter, go back
-                break;
+                return 7;
 
             while(continuous_choice  != 49 && continuous_choice != 50){ // until the user pressed a valid key, keep them trapped in an infinite loop
                 continuous_choice = getch();                            // wait user input
@@ -1668,7 +1841,7 @@ int Menu::settings(){
                     beep();
 
                 if(continuous_choice == 10)                             // if the user pressed Enter, go back and free them
-                    break;
+                    return 7;
             }
 
             // determine the next step based on user input
@@ -1676,7 +1849,7 @@ int Menu::settings(){
                 continuous_mode = true;
             else                         // otherwise, tun it off
                 continuous_mode = false; 
-            break;
+            return 7;
         }
         case 54:{            // Save settings (to file)
             save_settings();
@@ -1687,6 +1860,159 @@ int Menu::settings(){
         }
         }
     }
+}
+
+void Menu::print_invalid_input(){
+    string temp_string = "Invalid input! Press any key to continue...";
+    if(text_position == 1)                                                             // check if text should be left side aligned or centered and write accordingly
+        move(USER_INPUT_LINE, LINE_TEXT_START_POSITION);
+    else                                                       
+        move(USER_INPUT_LINE, COLS / 2 - 35);
+    printw("%s", temp_string.c_str());  // and warn him about it
+}
+
+void Menu::print_choose_database(){
+    move(USER_INPUT_LINE, 3);
+    for(int i = 3; i < COLS - 4; i++)
+        printw(" ");
+    
+    string temp_string = "Choose database: ";
+    if(text_position == 1)
+        move(USER_INPUT_LINE, 3);
+    else
+        move(USER_INPUT_LINE, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+    printw("%s", temp_string.c_str());
+}
+
+void Menu::clear_user_input_zone(){
+    move(LINES - 2, 3);
+    for(int i = 3; i < COLS - 4; i++)
+        printw(" ");
+    move(LINES - 2, 3);
+}
+
+bool Menu::choose_database(){
+    print_choose_database();
+    echo();
+    nocbreak();
+    char database_choice[3];
+    getnstr(database_choice, sizeof(database_choice) - 1);
+    
+    if(database_choice[0] == '\0')
+        return false;
+    else if(stoi(database_choice) > static_cast<int>(database_vector.size())){
+        print_invalid_input();
+        getch();
+        noecho();
+        cbreak();
+        return false;
+    }else
+        for(int i = 0; i < static_cast<int>(database_vector.size()); i++)
+            if(stoi(database_choice) == database_vector[i].get_database_id()){
+                current_database = database_vector[i];                         // make the selected database active
+                break;
+            }
+
+    noecho();
+    cbreak();
+    return true;
+}
+
+void Menu::print_find_menu(){
+    for (int i = 0; i < number_of_entries; i++){
+            move(AVAILABLE_OPTIONS_START_LINE - i, 3);
+            for (int j = 0; j < COLS / 2; j++)
+                printw(" ");
+    }
+    
+    move(USER_INPUT_LINE, 3);
+    for(int i = 3; i < COLS - 4; i++)
+        printw(" ");
+    
+    string temp_string = "Matching Databases";
+    if(text_position == 1)                                  // check if text should be left side aligned or centered and write accordingly
+        move(AVAILABLE_OPTIONS_START_LINE - number_of_entries, LINE_TEXT_START_POSITION);
+    else
+        move(AVAILABLE_OPTIONS_START_LINE - number_of_entries, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+    printw("%s", temp_string.c_str());
+
+    temp_string = "Search:";
+    move(USER_INPUT_LINE, LINE_TEXT_START_POSITION);
+    printw("%s", temp_string.c_str());
+}
+
+void Menu::print_search_word(const string& search_word){
+    move(USER_INPUT_LINE, 10);
+    for (int i = 0; i < COLS - 11; i++) 
+        printw(" ");
+    move(USER_INPUT_LINE, 10);
+    printw("%s", search_word.c_str());
+}
+
+void Menu::clear_search_results(){
+    for (int i = 0; i < number_of_entries; i++){
+        move(AVAILABLE_OPTIONS_START_LINE - i, 3);
+        for (int j = 0; j < CENTERED_LINE_TEXT_START_POSITION; j++)
+            printw(" ");
+    }
+    refresh();
+}
+
+void Menu::find_database(){
+    print_find_menu();
+    string input_word = "";
+    int counter = 0;
+
+    while (true) {
+        int input_char = getch();
+
+        if (input_char == KEY_BACKSPACE){
+            if (counter > 0) {
+                input_word.pop_back();
+                counter--;
+            }
+        }else if (input_char == 10 || input_char == KEY_ENTER){
+            break;
+        }else if (isprint(input_char)){                         // check if it's a printable character and not junk
+                input_word += static_cast<char>(input_char);
+                counter++;
+        }
+        print_search_word(input_word);
+        clear_search_results();
+
+        vector<Database> found_databases = match_word(input_word);
+        print_found_databases(found_databases);
+        found_databases.clear();
+    }                            
+    noecho();
+    cbreak();
+}
+
+void Menu::decrement_page(){
+        if(continuous_mode){                                                                                 // if Continuous Mode on
+            if(page_number == 0)                                                                             // and if on page 0
+                page_number = current_database.get_number_of_objects() / number_of_entries;                  // go to last page
+            else                                                                                             // but if not on page 0
+                page_number--;                                                                               // just decrement the page number
+        }else if(page_number > 0)                                                                            // otherwise, if Continuous Mode off and not on the first page
+            page_number --;                                                                                  // decrement the page number     
+}
+
+void Menu::increment_page(){
+    if(continuous_mode){                                                                                     // if Continuous Mode on                       
+        if(page_number == static_cast<int>(database_vector.size()) / number_of_entries)                      // and if on the last page
+            page_number = 0;                                                                                 // go to page 0
+        else                                                                                                 // but if not on the last page
+            page_number++;                                                                                   // just increment the page number
+    }else if(page_number < static_cast<int>(database_vector.size()) / number_of_entries)                     // oterwise, if Continuous Mode off and not on the last page
+        page_number ++;                                                                                      // go to next page
+}
+
+void Menu::update_index_manager(){
+    ofstream index_manager("index_manager.txt");                                     // rewrite index_manager
+    for(int j = 0; j < static_cast<int>(database_vector.size()); j++) 
+        index_manager << j << '.' << database_vector[j].get_database_name() << '\n';
+    index_manager.close();                                                           // close the file
 }
 
 void Menu::save_settings(){
@@ -1744,12 +2070,12 @@ vector<Database> Menu::match_word(const string& input_word) {
 
 void Menu::print_found_databases(vector<Database> found_databases){
     for(int i = 0; i < number_of_entries; i++){
-            if(i + all_database_page_number * number_of_entries < static_cast<int>(found_databases.size())){
+            if(i + page_number * number_of_entries < static_cast<int>(found_databases.size())){
                 if(text_position == 1)                                                                       // check if text should be left side aligned or centered and write accordingly
-                    move(LINES - 4 - i, 3);
+                    move(AVAILABLE_OPTIONS_START_LINE - i, LINE_TEXT_START_POSITION);
                 else
-                    move(LINES - 4 - i, COLS / 2 - (found_databases[i + all_database_page_number * number_of_entries].get_database_name().length() / 2));
-                printw("%d.%s", found_databases[i + all_database_page_number * number_of_entries].get_database_id(), found_databases[i + all_database_page_number * number_of_entries].get_database_name().c_str());
+                    move(AVAILABLE_OPTIONS_START_LINE - i, CENTERED_LINE_TEXT_START_POSITION - (found_databases[i + page_number * number_of_entries].get_database_name().length() / 2));
+                printw("%d.%s", found_databases[i + page_number * number_of_entries].get_database_id(), found_databases[i + page_number * number_of_entries].get_database_name().c_str());
             }
     }
 }

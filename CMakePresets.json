@@ -1,0 +1,24 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "windows",
+      "displayName": "Windows with vcpkg",
+      "description": "Configure for Windows using vcpkg.",
+      "binaryDir": "${sourceDir}/build/",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": {
+          "value": "C:/Users/visoi/vcpkg/scripts/buildsystems/vcpkg.cmake"
+        }
+      },
+      "generator": "Visual Studio 17 2022"
+    },
+    {
+      "name": "linux",
+      "displayName": "Linux default",
+      "description": "Configure for Linux with default settings.",
+      "binaryDir": "${sourceDir}/build/",
+      "cacheVariables": {}
+    }
+  ]
+}

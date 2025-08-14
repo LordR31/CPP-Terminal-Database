@@ -1,5 +1,5 @@
 // utils.cpp
-#include "utils.h"
+#include "utils.hpp"
 
 int old_cols = 0;  // stores window number of columns before window resize
 int old_lines = 0; // stores window number of lines before window resize

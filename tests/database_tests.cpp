@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
-#include "../src/classes/Database.h"
-#include "../src/classes/Object.h"
+#include "../src/classes/Database.hpp"
+#include "../src/classes/Object.hpp"
 #include <fstream>
 #include <filesystem>
 

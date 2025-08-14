@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "../src/classes/Object.h"
+#include "../src/classes/Object.hpp"
 #include <string>
 
 using namespace std;
