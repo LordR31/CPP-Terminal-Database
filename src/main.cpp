@@ -61,17 +61,17 @@ int main() {
     move(LINES - FILES_LOADING_ANIMATION_LINE_POSITION, LINE_TEXT_START_POSITION);
     printw("Loading files...");
     move(LINES - FILES_LOADING_ANIMATION_LINE_POSITION + 1, LINE_TEXT_START_POSITION);
-    // loading_animation(16, FILES_LOADING_ANIMATION_TEXT_DELAY);
+    loading_animation(16, FILES_LOADING_ANIMATION_TEXT_DELAY);
 
     move(LINES - MENU_LOADING_ANIMATION_LINE_POSITION, LINE_TEXT_START_POSITION);
     printw("Menu loading...");
     move(LINES - MENU_LOADING_ANIMATION_LINE_POSITION + 1, LINE_TEXT_START_POSITION);
-    // loading_animation(13, MENU_LOADING_ANIMATION_TEXT_DELAY);
+    loading_animation(13, MENU_LOADING_ANIMATION_TEXT_DELAY);
 
     move(LINES - DATABASE_LOADING_ANIMATION_LINE_POSITION, LINE_TEXT_START_POSITION);
     printw("Database loading...");
     move(LINES - DATABASE_LOADING_ANIMATION_LINE_POSITION + 1, LINE_TEXT_START_POSITION);
-    // loading_animation(10, DATABASE_LOADING_ANIMATION_TEXT_DELAY);
+    loading_animation(10, DATABASE_LOADING_ANIMATION_TEXT_DELAY);
 
     move(LINES - LOADING_FINISHED_TEXT_POSITION, LINE_TEXT_START_POSITION);
     printw("Loading finished!");
@@ -90,10 +90,10 @@ int main() {
             current_menu = main_menu.main_menu();    
             break;
         case MANAGE_DATABASE_MENU_ID:
-            current_menu = main_menu.manage_database_menu();
+            current_menu = main_menu.manage_databases_menu();
             break;
         case CREATE_DATABASE_MENU_ID:
-            current_menu = main_menu.create_database();
+            current_menu = main_menu.create_database_menu();
             break;
         case LOAD_DATABASE_MENU_ID:
             current_menu = main_menu.load_database_menu();
