@@ -59,7 +59,7 @@ private:
     bool delete_database();
 
     void print_delete_database_menu(bool is_empty, bool is_paged);
-    void print_delete_database_menu_options(bool is_paged);
+    void print_delete_database_menu_options(bool is_empty, bool is_paged);
     void print_delete_database_choose_menu();
     void print_delete_database_confirm_deletion_menu();
     void print_delete_database_confirm_deletion_prompt(bool is_confirmed);
@@ -87,8 +87,8 @@ private:
     void print_continuous_mode_settings();
 
     // MENU FUNCTIONS
-    void decrement_page();
-    void increment_page();
+    void decrement_page(bool is_database);
+    void increment_page(bool is_database);
     void clear_user_input_zone();
     void clear_search_results();
     bool choose_database();
@@ -99,7 +99,7 @@ private:
 
     void print_invalid_input();
     
-
+    void get_new_database_index();
     void save_settings();          // Save settings (to file)
     void reload_database_vector(); // Reload database vector
     // VARIABLES, OBJECTS AND VECTORS

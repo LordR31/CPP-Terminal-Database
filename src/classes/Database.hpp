@@ -35,9 +35,12 @@ public:
     bool add_object(std::string name, std::string type, int quantity); // Adds object to database
     bool delete_object(int id_to_find);                                // Deletes objects from database
     bool delete_object(std::string string_to_find);
+    bool operator<(const Database& database_object);
 private: 
     void load_objects();                                               // Loads objects from file. Called in "load_database()"
     std::string save_objects_to_file(int index);                       // Saves the database objects to the database file
+
+    
 
     int database_id = 0;                                               // "unique" database id
                                                                        // database name

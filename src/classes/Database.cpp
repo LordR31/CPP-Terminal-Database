@@ -159,3 +159,7 @@ bool Database::delete_object(string string_to_find){
 
     return true;
 }
+
+bool Database::operator<(const Database& database_object){
+        return database_id < database_object.database_id;
+    }
