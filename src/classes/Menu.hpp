@@ -47,7 +47,7 @@ private:
     void print_found_databases(std::vector<Database> found_databases);
     void print_find_menu();
     void print_search_word(const std::string& search_word);
-    void print_load_database_options(bool is_paged);
+    void print_load_database_options(bool is_paged, bool show_clear_button);
     void print_edit_database_menu();
     void print_edit_database_name();
 
@@ -59,7 +59,7 @@ private:
     bool delete_database();
 
     void print_delete_database_menu(bool is_empty, bool is_paged);
-    void print_delete_database_menu_options(bool is_empty, bool is_paged);
+    void print_delete_database_menu_options(bool is_empty, bool is_paged, bool show_clear_button);
     void print_delete_database_choose_menu();
     void print_delete_database_confirm_deletion_menu();
     void print_delete_database_confirm_deletion_prompt(bool is_confirmed);

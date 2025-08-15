@@ -309,17 +309,15 @@ void Menu::print_load_database(bool is_empty, bool is_paged){
             move(CENTERED_AVAILABLE_OPTIONS_START_LINE + 2, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
             printw("%s", temp_string.c_str());
         }
-
-        print_load_database_options(is_paged);
     }
     refresh();
 }
 
-void Menu::print_load_database_options(bool is_paged){
+void Menu::print_load_database_options(bool is_paged, bool show_clear_button){
     string temp_string = "1 - Previous Page";
     int offset = 5;
     int current_position = LINE_TEXT_START_POSITION + offset;
-    if(is_paged){                                 // if there ARE pages, show the page buttons
+    if(is_paged & (!show_clear_button)){                                 // if there ARE pages, show the page buttons
         move(USER_INPUT_LINE, current_position);
         printw("%s", temp_string.c_str());
     }
@@ -330,17 +328,24 @@ void Menu::print_load_database_options(bool is_paged){
     printw("%s", temp_string.c_str());
     current_position += temp_string.length() + offset;
 
-    temp_string = "3 - Find";
-    move(USER_INPUT_LINE, current_position);
-    printw("%s", temp_string.c_str());
-    current_position += temp_string.length() + offset;
+    if(show_clear_button){
+        temp_string = "3 - Clear";
+        move(USER_INPUT_LINE, current_position);
+        printw("%s", temp_string.c_str());
+        current_position += temp_string.length() + offset;
+    }else{
+        temp_string = "3 - Find";
+        move(USER_INPUT_LINE, current_position);
+        printw("%s", temp_string.c_str());
+        current_position += temp_string.length() + offset;
+    }
 
     temp_string = "4 - Edit";
     move(USER_INPUT_LINE, current_position);
     printw("%s", temp_string.c_str());
     current_position += temp_string.length() + offset;
 
-    if(is_paged){
+    if(is_paged & (!show_clear_button)){
         temp_string = "5 - Next Page";
         move(USER_INPUT_LINE, current_position);
         printw("%s", temp_string.c_str());
@@ -350,12 +355,14 @@ void Menu::print_load_database_options(bool is_paged){
 int Menu::load_database_menu(){
     bool is_paged = false;
     bool is_empty = database_vector.empty();
-    
+    bool is_in_find_interface = false;
+
     if(!is_empty)
         if(static_cast<int>(database_vector.size()) > number_of_entries) // if there IS something to display, check if you need pages
             is_paged = true;
 
     print_load_database(is_empty, is_paged);
+    print_load_database_options(is_paged, is_in_find_interface);
         
     if(is_empty){
         getch();
@@ -372,7 +379,7 @@ int Menu::load_database_menu(){
 
         switch (choice){
             case 49:
-                if(is_paged)                                                                                                        // if the button is shown (there are pages)
+                if(is_paged & ~is_in_find_interface)                                                                                                        // if the button is shown (there are pages)
                     decrement_page(true);
                 return 3;
             case 50:
@@ -381,9 +388,14 @@ int Menu::load_database_menu(){
                 else
                     return 3;
             case 51:
-                find_database();
-                clear_user_input_zone();
-                print_load_database_options(is_paged);
+                if(is_in_find_interface){
+                    return 3;
+                }else{
+                    find_database();
+                    clear_user_input_zone();
+                    is_in_find_interface = true;
+                    print_load_database_options(is_paged, is_in_find_interface);
+                }
                 continue;
             case 52:
                 if(edit_database()){
@@ -392,7 +404,7 @@ int Menu::load_database_menu(){
                 }
                 return 3;
             case 53:
-                if(is_paged)                                                                                                     // if the button is shown (there are pages)            
+                if(is_paged & ~is_in_find_interface)                                                                                                     // if the button is shown (there are pages)            
                     increment_page(true);                                                                                 // otherwise just ignore this input
                 return 3; 
             case 10:
@@ -555,14 +567,14 @@ void Menu::print_delete_database_menu(bool is_empty, bool is_paged){
     }
 }
 
-void Menu::print_delete_database_menu_options(bool is_empty, bool is_paged){
+void Menu::print_delete_database_menu_options(bool is_empty, bool is_paged, bool show_clear_button){
     if(!is_empty){
         int initial_offset = 8;
         int offset = 5;
         int current_position = LINE_TEXT_START_POSITION + initial_offset + offset;
 
         string temp_string;
-        if(is_paged){
+        if(is_paged & (!show_clear_button)){
             temp_string = "1 - Previous Page";
             move(USER_INPUT_LINE, current_position);
             printw("%s", temp_string.c_str());
@@ -574,12 +586,19 @@ void Menu::print_delete_database_menu_options(bool is_empty, bool is_paged){
         printw("%s", temp_string.c_str());
         current_position += temp_string.length() + offset;
         
-        temp_string = "3 - Find";
-        move(USER_INPUT_LINE, current_position);
-        printw("%s", temp_string.c_str());
-        current_position += temp_string.length() + offset;
+        if(show_clear_button){
+            temp_string = "3 - Clear";
+            move(USER_INPUT_LINE, current_position);
+            printw("%s", temp_string.c_str());
+            current_position += temp_string.length() + offset;
+        }else{
+            temp_string = "3 - Find";
+            move(USER_INPUT_LINE, current_position);
+            printw("%s", temp_string.c_str());
+            current_position += temp_string.length() + offset;
+        }
 
-        if(is_paged){
+        if(is_paged & (!show_clear_button)){
             temp_string = "3 - Next Page";
             move(USER_INPUT_LINE, current_position);
             printw("%s", temp_string.c_str());
@@ -637,12 +656,14 @@ void Menu::print_delete_database_confirm_deletion_prompt(bool is_confirmed){
 int Menu::delete_database_menu(){
     bool is_paged = false;
     bool is_empty = database_vector.empty();
+    bool is_in_find_interface = false;
+
     if (!is_empty){                          // check if there are any databases to print
         if(static_cast<int>(database_vector.size()) > number_of_entries)
             is_paged = true;
         }
     print_delete_database_menu(is_empty, is_paged);
-    print_delete_database_menu_options(is_empty, is_paged);
+    print_delete_database_menu_options(is_empty, is_paged, is_in_find_interface);
         
     if(is_empty){
         getch();
@@ -728,9 +749,14 @@ int Menu::delete_database_menu(){
                     return 4;
                 }
                 case 51:
-                    find_database();
-                    clear_user_input_zone();
-                    print_delete_database_menu_options(is_empty, is_paged);
+                    if(is_in_find_interface){
+                        return 4;
+                    }else{
+                        find_database();
+                        clear_user_input_zone();
+                        is_in_find_interface = true;
+                        print_delete_database_menu_options(is_empty, is_paged, is_in_find_interface);
+                    }
                     continue;
                 case 52:
                     increment_page(true);                                                                                                  // otherwise just ignore this input
