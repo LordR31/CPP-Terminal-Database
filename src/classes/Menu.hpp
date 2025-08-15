@@ -45,7 +45,7 @@ private:
     void print_load_database(bool is_empty, bool is_paged); // Print Load Database Menu
     void print_choose_database();
     void print_found_databases(std::vector<Database> found_databases);
-    void print_find_menu();
+    void print_find_menu(bool is_database);
     void print_search_word(const std::string& search_word);
     void print_load_database_options(bool is_paged, bool show_clear_button);
     void print_edit_database_menu();
@@ -67,9 +67,11 @@ private:
     // Print Current Database Menu
     int add_object_menu();          // Add Object Menu
     bool delete_object_menu();      // Delete Object Menu
-    
+    void edit_object_menu();
+    void find_object_menu();
+
     void print_current_database_menu(bool is_empty, bool is_paged);
-    void print_current_database_menu_options(bool is_empty, bool is_paged);
+    void print_current_database_menu_options(bool is_empty, bool is_paged, bool show_clear_button);
     void print_current_database_menu_delete_object_prompt(int number_of_elements_deleted);
     void print_add_object_menu();
     void print_add_object_result(bool result);
@@ -77,6 +79,10 @@ private:
     void print_delete_by_id();
     void print_delete_by_name();
     void print_delete_by_type();
+    void print_edit_object_menu();
+    void print_edit_object(int object_id);
+    void print_find_object_menu();
+    void print_found_objects(const std::vector<Object>& found_objects);
 
     // Settings Menu
     void print_settings_menu();

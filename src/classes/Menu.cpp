@@ -270,7 +270,7 @@ void Menu::print_load_database(bool is_empty, bool is_paged){
 
     draw_line(decorator_type);                                                                     // draw the bottom line
     // write out the menu options
-    string temp_string = "Press Enter to go back.";
+    string temp_string = "Press Enter to go back";
     move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 4, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
     printw("%s", temp_string.c_str());
 
@@ -901,10 +901,14 @@ void Menu::print_current_database_menu(bool is_empty, bool is_paged){
     draw_line(decorator_type);
     refresh();
 
-    string temp_string = "Database is empty. No objects to display.";
+    string temp_string = "Press Enter to go back";
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 4, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+    printw("%s", temp_string.c_str());
+
+    temp_string = "Database is empty. No objects to display.";
     if(is_empty){                                                         // if the database is empty
-        move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 6, COLS / 2 - 25);
-         printw("%s", temp_string.c_str());              // tell the user there's nothing to display
+        move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 6, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+        printw("%s", temp_string.c_str());              // tell the user there's nothing to display
     }else{                                                                // otherwise
                                                                           // write out the database structure
         temp_string = "ID";
@@ -944,37 +948,49 @@ void Menu::print_current_database_menu(bool is_empty, bool is_paged){
     }
 }
 
-void Menu::print_current_database_menu_options(bool is_empty, bool is_paged){
+void Menu::print_current_database_menu_options(bool is_empty, bool is_paged, bool show_clear_button){
     int offset = 5;
     int current_position = LINE_TEXT_START_POSITION + offset;
-    string temp_string;
-
-    if(is_paged){                                 // if there ARE pages, show the page buttons
-        temp_string = "1 - Previous Page";
-        move(USER_INPUT_LINE, current_position);
-        printw("%s", temp_string.c_str());
-        current_position += offset + temp_string.length();
-    }
-
-    if(!is_empty){                                // if it's NOT empty, show the delete button
-        temp_string = "3 - Delete item";
+    
+    string temp_string = "1 - Previous Page";
+    if(is_paged & (!show_clear_button)){                                 // if there ARE pages, show the page buttons
         move(USER_INPUT_LINE, current_position);
         printw("%s", temp_string.c_str());
     }
     current_position += offset + temp_string.length();
 
-    temp_string = "2 - Add item";
+    temp_string = "2 - Add";
     move(USER_INPUT_LINE, current_position);
     printw("%s", temp_string.c_str()); 
-    current_position += offset + temp_string.length();                    
-    
-    temp_string = "4 - Back";
-    move(USER_INPUT_LINE, current_position);
-    printw("%s", temp_string.c_str());
+    current_position += offset + temp_string.length();  
+
+    if(!is_empty){                                // if it's NOT empty, show the delete button
+        temp_string = "3 - Delete";
+        move(USER_INPUT_LINE, current_position);
+        printw("%s", temp_string.c_str());
+    }
     current_position += offset + temp_string.length();
 
-    if(is_paged){ 
-        temp_string = "5 - Next Page";
+    if(!is_empty & (!show_clear_button)){
+        temp_string = "4 - Find";
+        move(USER_INPUT_LINE, current_position);
+        printw("%s", temp_string.c_str());
+    }else{
+        temp_string = "4 - Clear";
+        move(USER_INPUT_LINE, current_position);
+        printw("%s", temp_string.c_str());
+    }
+    current_position += offset + temp_string.length();
+
+    if(!is_empty){
+        temp_string = "5 - Edit";
+        move(USER_INPUT_LINE, current_position);
+        printw("%s", temp_string.c_str());
+    }
+    current_position += offset + temp_string.length();
+    
+    if(is_paged & (!show_clear_button)){ 
+        temp_string = "6 - Next Page";
         move(USER_INPUT_LINE, current_position);
         printw("%s", temp_string.c_str());
     }
@@ -998,12 +1014,14 @@ int Menu::current_database_menu(){
 
     bool is_paged = false;
     bool is_empty = current_database_objects.empty();
+    bool is_in_find_interface = false;
+
     if (!is_empty)                                                                // check if the database is empty
         if(current_database.get_number_of_objects() > number_of_entries) // and if there are objects to display, check if you need pages
             is_paged = true;                                                     
 
     print_current_database_menu(is_empty, is_paged);
-    print_current_database_menu_options(is_empty, is_paged);
+    print_current_database_menu_options(is_empty, is_paged, is_in_find_interface);
 
     // determine the next step based on user input
     while(true){
@@ -1040,18 +1058,29 @@ int Menu::current_database_menu(){
                 }
                 return 6;
             }
-            case 52:{      
-                page_number = 0;                                                                                                           // 4 -> Back
-                return 3;                                                                                                            // exit loop to return to Load Database Menu
+            case 52:{     
+                if(is_in_find_interface){
+                    return 6;
+                }else{
+                    find_object_menu();  
+                    clear_user_input_zone();
+                    is_in_find_interface = true;
+                    print_current_database_menu_options(is_empty, is_paged, is_in_find_interface);  
+                }
+                continue;                                                                                                          // exit loop to return to Load Database Menu
             }
-                                                                                                                                    // TODO: Add Find & Edit button
                                                                                                                                     // TODO: Add number of elements counter to screen
                                                                                                                                     // TODO: Add number of pages to screen:    Page X/XX
-
-            
+            case 53:{
+                edit_object_menu();
+                current_database.save_database();
+                reload_database_vector();
+                return 6;
+            }
             case 10:
+                page_number = 0;
                 return 3;
-            case 53:{                                                                                                               // 5 -> Next page
+            case 54:{                                                                                                               // 5 -> Next page
                 if(is_paged)                                                                                                       // if the button is shown (there are pages)            
                     decrement_page(false);
                 return 6;
@@ -1136,7 +1165,7 @@ int Menu::add_object_menu(){
         try{                                                                          // then try to create an object with them
             string temp_name = temp_object[0];
             string temp_type = temp_object[1];
-            int temp_quantity = std::stoi(temp_object[2]);
+            int temp_quantity = stoi(temp_object[2]);
 
             result = current_database.add_object(temp_name, temp_type, temp_quantity);         // and add it to the database object vector
 
@@ -1150,6 +1179,234 @@ int Menu::add_object_menu(){
         break;
     }
     return 1;
+}
+
+void Menu::print_edit_object_menu(){
+    move(MENU_TITTLE_LINE_POSITION, LINE_TEXT_START_POSITION);
+    printw("Edit Object Menu");
+
+    string temp_string = "Objects are edited using the following format:";
+    // inform the user as to how to create new objects
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 4, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+    printw("%s", temp_string.c_str());
+
+    temp_string = "All the features are optional, but there must be at least one of them";
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 2, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+    printw("%s", temp_string.c_str());
+
+    temp_string = "To skip one feature leave blank (press space)";
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 0, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+    printw("%s", temp_string.c_str());
+
+    temp_string = "**********************";
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 5, LAST_COLUMN_OF_TEXT - temp_string.length() - 2); // 2 -> little space between * and border
+    printw("%s", temp_string.c_str());
+
+    temp_string = "name type quantity";
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 4, LAST_COLUMN_OF_TEXT - temp_string.length() - 4); // 4 -> little space between text and border
+    printw("%s", temp_string.c_str());
+
+    temp_string = "**********************";
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 3, LAST_COLUMN_OF_TEXT - temp_string.length() - 2); // 2 -> little space between * and border
+    printw("%s", temp_string.c_str());
+
+    temp_string = "Leave blank and press Enter to cancel and go back";
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+    printw("%s", temp_string.c_str());
+    
+    clear_user_input_zone();
+    temp_string = "Choose item to edit:";
+    move(USER_INPUT_LINE, LINE_TEXT_START_POSITION);
+    printw("%s", temp_string.c_str());
+}
+
+void Menu::print_edit_object(int object_id){
+    clear();
+    draw_main_box(decorator_type);
+    move(MENU_TITTLE_LINE_POSITION, LINE_TEXT_START_POSITION);
+    printw("Edit Object Menu");
+    print_program_tittle();
+    draw_line(decorator_type);
+
+    string temp_string = "Object chosen for edit";
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 4, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+    printw("%s", temp_string.c_str());
+
+    temp_string = current_database.get_object_by_id(object_id);
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE - 3, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+    printw("%s", temp_string.c_str());
+
+    temp_string = "Enter new object details:";
+    move(USER_INPUT_LINE, LINE_TEXT_START_POSITION);
+    printw("%s", temp_string.c_str());
+}   
+
+void Menu::edit_object_menu(){
+    print_edit_object_menu();
+
+    echo();                                                                                                                            // enable echo 
+    nocbreak();                                                                                                                        // enable buffering
+    char object_id [256];
+    getnstr(object_id, sizeof(object_id) - 1);                                                                                 // get user input
+    if(sound)                                                                                                                          // make ANNOYING sound if sound turned on
+        beep();
+    noecho();                                                                                                                          // no echo
+    cbreak();                                                                                                                          // no buffering
+
+    if(check_resize())                                                                                                                 // check if the window was resized by the user and re-enter the menu to re-draw everything
+        return;
+
+    if(object_id[0] == '\0')                                                                                                       // if the user pressed Enter, go back 
+        return;
+    
+    print_edit_object(stoi(object_id));
+    echo();                                                                                                                            // enable echo 
+    nocbreak();                                                                                                                        // enable buffering
+    char new_features [256];
+    getnstr(new_features, sizeof(new_features) - 1);                                                                                 // get user input
+    if(sound)                                                                                                                          // make ANNOYING sound if sound turned on
+        beep();
+    noecho();                                                                                                                          // no echo
+    cbreak();
+
+    if(new_features[0] == '\0')                                                                                                       // if the user pressed Enter, go back 
+        return;
+
+    bool is_name = true;
+    bool is_type = true;
+    bool is_quantity = true;
+
+    if(new_features[0] == ' ')
+        is_name = false;
+    
+    if(new_features[1] == ' ')
+        is_type = false;
+
+    if(new_features[2] == ' ')
+        is_quantity = false;
+
+    stringstream new_object(new_features);
+    vector<string> temp_object;
+    string temp_object_feature;
+
+    string new_name;
+    string new_type;
+    int new_quantity;
+
+    while(getline(new_object, temp_object_feature, ' ')){                          // so long as there are features to remove from that input line
+        temp_object.push_back(temp_object_feature);                                // extract them into a vector
+    }
+
+    if(is_name){
+        new_name = temp_object[0];
+        if(is_type){
+            new_type = temp_object[1];
+            if(is_quantity)
+                new_quantity = stoi(temp_object[2]);
+        }else if(is_quantity)
+            new_quantity = stoi(temp_object[1]);
+    }else if(is_type){
+        new_type = temp_object[0];
+        if(is_quantity)
+            new_quantity = stoi(temp_object[1]);
+    }else
+        new_quantity = stoi(temp_object[0]);
+
+    if(is_name)
+        if(is_type)
+            if(is_quantity)
+                current_database.edit_object(stoi(object_id), new_name, new_type, new_quantity);
+            else
+                current_database.edit_object(stoi(object_id), new_name, new_type);
+        else
+            current_database.edit_object(stoi(object_id), new_name);
+    else
+        return;
+
+}
+
+void Menu::find_object_menu(){
+    print_find_menu(false);
+    
+    string input_word = "";
+    int counter = 0;
+
+    vector<Object> found_objects;
+
+    while (true) {
+        int input_char = getch();
+
+        if (input_char == KEY_BACKSPACE){
+            if (counter > 0) {
+                input_word.pop_back();
+                counter--;
+            }
+        }else if (input_char == 10 || input_char == KEY_ENTER){
+            noecho();
+            cbreak();
+            break;
+        }else if (isprint(input_char)){                         // check if it's a printable character and not junk
+                input_word += static_cast<char>(input_char);
+                counter++;
+        }
+        print_search_word(input_word);
+        clear_search_results();
+
+        vector<Object> id_results = current_database.find_object_by_id(input_word);
+        vector<Object> name_results = current_database.find_object_by_name(input_word);
+        vector<Object> type_results = current_database.find_object_by_type(input_word);
+        vector<Object> quantity_results = current_database.find_object_by_quantity(input_word);
+
+        found_objects.insert(found_objects.end(), id_results.begin(), id_results.end());
+        found_objects.insert(found_objects.end(), name_results.begin(), name_results.end());
+        found_objects.insert(found_objects.end(), type_results.begin(), type_results.end());
+        found_objects.insert(found_objects.end(), quantity_results.begin(), quantity_results.end());
+
+        sort(found_objects.begin(), found_objects.end());
+        auto last_unique_element = unique(found_objects.begin(), found_objects.end());
+        found_objects.erase(last_unique_element, found_objects.end());
+
+        print_found_objects(found_objects);
+        found_objects.clear();
+    }                            
+    noecho();
+    cbreak();
+}
+
+void Menu::print_found_objects(const vector<Object>& found_objects){
+        string temp_string = "ID";
+        move(AVAILABLE_OPTIONS_START_LINE - number_of_entries - 1, LINE_TEXT_START_POSITION);
+        printw("%s", temp_string.c_str());
+
+        temp_string = "Name";
+        move(AVAILABLE_OPTIONS_START_LINE - number_of_entries - 1, LINE_TEXT_START_POSITION + 5); // 5 -> offset
+        printw("%s", temp_string.c_str());
+                                 
+        temp_string = "Type";
+        move(AVAILABLE_OPTIONS_START_LINE - number_of_entries - 1, LINE_TEXT_START_POSITION + 50); // 50 -> offset for name
+        printw("%s", temp_string.c_str());
+                                 
+        temp_string = "Quantity";
+        move(AVAILABLE_OPTIONS_START_LINE - number_of_entries - 1, LINE_TEXT_START_POSITION + 80); // 80 -> offset for type
+        printw("%s", temp_string.c_str());                                             
+
+        // temp_string = "Page " + to_string(page_number + 1);
+        // move(CENTERED_AVAILABLE_OPTIONS_START_LINE + 2, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+        // printw("%s", temp_string.c_str());
+
+        for(int i = 0; i < number_of_entries; i++){                                    // and then print the objects, as many on a page as selected by the user (number_of_entries)
+            if(i + page_number * number_of_entries < static_cast<int>(found_objects.size())){
+                move(AVAILABLE_OPTIONS_START_LINE - i, LINE_TEXT_START_POSITION);
+                printw("%d",found_objects[i + page_number * number_of_entries].get_id());
+                move(AVAILABLE_OPTIONS_START_LINE - i, LINE_TEXT_START_POSITION + 5);
+                printw("%s",found_objects[i + page_number * number_of_entries].get_name().c_str());
+                move(AVAILABLE_OPTIONS_START_LINE - i, LINE_TEXT_START_POSITION + 50);
+                printw("%s", found_objects[i + page_number * number_of_entries].get_type().c_str());
+                move(AVAILABLE_OPTIONS_START_LINE - i, LINE_TEXT_START_POSITION + 80);
+                printw("%d", found_objects[i + page_number * number_of_entries].get_quantity());
+                refresh();
+            }
+        }
 }
 
 void Menu::print_delete_object_menu(){
@@ -1867,10 +2124,10 @@ void Menu::print_choose_database(){
 }
 
 void Menu::clear_user_input_zone(){
-    move(LINES - 2, 3);
-    for(int i = 3; i < COLS - 4; i++)
+    move(USER_INPUT_LINE, LINE_TEXT_START_POSITION);
+    for(int i = 3; i < LAST_COLUMN_OF_TEXT - LINE_TEXT_START_POSITION; i++)
         printw(" ");
-    move(LINES - 2, 3);
+    move(USER_INPUT_LINE, LINE_TEXT_START_POSITION);
 }
 
 bool Menu::choose_database(){
@@ -1898,23 +2155,39 @@ bool Menu::choose_database(){
     return true;
 }
 
-void Menu::print_find_menu(){
+void Menu::print_find_menu(bool is_database){
     for (int i = 0; i < number_of_entries; i++){
             move(AVAILABLE_OPTIONS_START_LINE - i, LINE_TEXT_START_POSITION);
             for (int j = LINE_TEXT_START_POSITION; j < LAST_COLUMN_OF_TEXT - LINE_TEXT_START_POSITION; j++)
                 printw(" ");
     }
     
-    move(USER_INPUT_LINE, LINE_TEXT_START_POSITION);
+    move(CENTERED_AVAILABLE_OPTIONS_START_LINE + 2, LINE_TEXT_START_POSITION);
     for(int i = LINE_TEXT_START_POSITION; i < LAST_COLUMN_OF_TEXT - LINE_TEXT_START_POSITION; i++)
         printw(" ");
+
+    clear_user_input_zone();
     
-    string temp_string = "Matching Databases";
-    if(text_position == 1)                                  // check if text should be left side aligned or centered and write accordingly
+    string temp_string;
+    if(is_database){
+        temp_string = "Matching Databases";
+        if(text_position == 1)                                  // check if text should be left side aligned or centered and write accordingly
         move(AVAILABLE_OPTIONS_START_LINE - number_of_entries, LINE_TEXT_START_POSITION);
-    else
+        else
         move(AVAILABLE_OPTIONS_START_LINE - number_of_entries, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
-    printw("%s", temp_string.c_str());
+        printw("%s", temp_string.c_str());
+    }else{
+        move(AVAILABLE_OPTIONS_START_LINE - number_of_entries - 1, LINE_TEXT_START_POSITION);
+        for(int i = LINE_TEXT_START_POSITION; i < LAST_COLUMN_OF_TEXT - LINE_TEXT_START_POSITION; i++)
+            printw(" ");
+
+        temp_string = "Matching Objects";
+        if(text_position == 1)                                  // check if text should be left side aligned or centered and write accordingly
+        move(AVAILABLE_OPTIONS_START_LINE - number_of_entries - 3, LINE_TEXT_START_POSITION);
+        else
+        move(AVAILABLE_OPTIONS_START_LINE - number_of_entries - 3, CENTERED_LINE_TEXT_START_POSITION - temp_string.length() / 2);
+        printw("%s", temp_string.c_str());
+    }
 
     temp_string = "Search:";
     move(USER_INPUT_LINE, LINE_TEXT_START_POSITION);
@@ -1993,7 +2266,7 @@ bool Menu::edit_database(){
 }
 
 void Menu::find_database(){
-    print_find_menu();
+    print_find_menu(true);
     string input_word = "";
     int counter = 0;
 

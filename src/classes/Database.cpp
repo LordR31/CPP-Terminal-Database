@@ -27,6 +27,14 @@ int Database::get_next_object_id(){
     return next_object_id;
 }
 
+string Database::get_object_by_id(int object_id){
+    string temp_string;
+    for(int i = 0; i < database_objects.size(); i++)
+        if(database_objects[i].get_id() == object_id)
+            temp_string = to_string(database_objects[i].get_id()) + " " + database_objects[i].get_name() + " " + database_objects[i].get_type() + " " + to_string(database_objects[i].get_quantity());
+    return temp_string;
+}
+
 void Database::set_database_name(const string& new_name){
     database_name = new_name;
 }
@@ -93,7 +101,7 @@ void Database::load_objects(){
     }
 }
 
-bool Database::add_object(string name, string type, int quantity){
+bool Database::add_object(const string& name, const string& type, int quantity){
     Object new_object(next_object_id, name, type, quantity);
     next_object_id++;
     database_objects.emplace_back(new_object);
@@ -101,18 +109,14 @@ bool Database::add_object(string name, string type, int quantity){
 }
 
 bool Database::delete_object(int id_to_find){
-    struct IsIdEqual{                                             // create a structure to easily check if the id from the user matches the current object id being checked
-            int id_to_match;
-            explicit IsIdEqual(int id) : id_to_match(id) {} 
-
-            bool operator()(const Object& obj) const {
-                return obj.get_id() == id_to_match;
-            }
-        };
-
         int initial_size = database_objects.size();
         // check if the id from the user matches any id from the vector using that structure from above
-        database_objects.erase(remove_if(database_objects.begin(), database_objects.end(), IsIdEqual(id_to_find)), database_objects.end());
+        for (auto i = database_objects.begin(); i != database_objects.end();)
+            if(i->get_id() == id_to_find)
+                i = database_objects.erase(i);
+            else
+                i++;
+    
         int final_size = database_objects.size();
         if(initial_size == final_size)
             return false;
@@ -120,7 +124,7 @@ bool Database::delete_object(int id_to_find){
         return true;
 }
 
-bool Database::delete_object(string string_to_find){
+bool Database::delete_object(const string& string_to_find){
     string deletion_type;
     size_t position = string_to_find.find(".");
     deletion_type = string_to_find.substr(0, position);
@@ -128,38 +132,100 @@ bool Database::delete_object(string string_to_find){
     string temp_string_to_find = string_to_find.substr(position + 1);
 
     int initial_size = database_objects.size();
-    switch (stoi(deletion_type)){
-    case 0:
-        struct IsNameEqual {                                          // create a structure to easily check if the name from the user matches the current object name being checked
-            string name_to_match;
-            explicit IsNameEqual(const string& name) : name_to_match(name) {}
-                
-            bool operator()(const Object& obj) const {
-                return obj.get_name() == name_to_match;
+    switch (stoi(deletion_type)) {
+        case 0:
+            for (auto i = database_objects.begin(); i != database_objects.end();) {
+                if (i->get_name() == temp_string_to_find) 
+                    i = database_objects.erase(i);
+                else
+                    i++;
             }
-        };
-        // check if the name from the user matches any name from the vector using that structure from above
-        database_objects.erase(remove_if(database_objects.begin(), database_objects.end(), IsNameEqual(temp_string_to_find)), database_objects.end());
             break;
-    case 1:
-        struct IsTypeEqual {                                          // create a structure to easily check if the type from the user matches the current object type being checked
-            string type_to_match;
-            explicit IsTypeEqual(const string& type) : type_to_match(type) {}
-                
-            bool operator()(const Object& obj) const {
-                return obj.get_type() == type_to_match;
+        case 1:
+            for (auto i = database_objects.begin(); i != database_objects.end();) {
+                if (i->get_type() == temp_string_to_find)
+                    i = database_objects.erase(i);
+                else 
+                    i++;
             }
-        };
-        // check if the type from the user matches any type from the vector using that structure from above
-        database_objects.erase(remove_if(database_objects.begin(), database_objects.end(), IsTypeEqual(temp_string_to_find)), database_objects.end());
+            break;
     }
     int final_size = database_objects.size();
-    if(initial_size == final_size)
-            return false;
 
-    return true;
+    return initial_size != final_size;
 }
 
 bool Database::operator<(const Database& database_object){
         return database_id < database_object.database_id;
+}
+
+vector<Object> Database::find_object_by_id(const string& match_word){
+    vector<Object> temp_vector;
+    for (auto& object : database_objects) {
+        string object_id = to_string(object.get_id());
+        if (object_id.rfind(match_word, 0) == 0)
+            temp_vector.push_back(object);
     }
+
+    return temp_vector;
+}
+
+vector<Object> Database::find_object_by_name(const string& match_word){
+    vector<Object> temp_vector;
+
+    for (auto& object : database_objects) {
+        string object_name = object.get_name();
+        if (object_name.rfind(match_word, 0) == 0)
+            temp_vector.push_back(object);
+    }
+
+    return temp_vector;
+}
+
+vector<Object> Database::find_object_by_type(const string& match_word){
+    vector<Object> temp_vector;
+
+    for (auto& object : database_objects) {
+        string object_type = object.get_type();
+        if (object_type.rfind(match_word, 0) == 0)
+            temp_vector.push_back(object);
+    }
+
+    return temp_vector;
+}
+
+vector<Object> Database::find_object_by_quantity(const string& match_word){
+    vector<Object> temp_vector;
+
+    for (auto& object : database_objects) {
+        string object_quantity = to_string(object.get_quantity());
+        if (object_quantity.rfind(match_word, 0) == 0)
+            temp_vector.push_back(object);
+    }
+
+    return temp_vector;
+}
+
+
+void Database::edit_object(int item_id, const string& new_name, const string& new_type, int new_quantity){
+    for(int i = 0; i < static_cast<int>(database_objects.size()); i++)
+        if(database_objects[i].get_id() == item_id){
+                database_objects[i].set_object_name(new_name);
+                database_objects[i].set_object_type(new_type);
+                database_objects[i].set_object_quantity(new_quantity);
+        }
+}
+
+void Database::edit_object(int item_id, const string& new_name, const string& new_type){
+    for(int i = 0; i < static_cast<int>(database_objects.size()); i++)
+        if(database_objects[i].get_id() == item_id){
+                database_objects[i].set_object_name(new_name);
+                database_objects[i].set_object_type(new_type);
+        }
+}
+
+void Database::edit_object(int item_id, const string& new_name){
+    for(int i = 0; i < static_cast<int>(database_objects.size()); i++)
+        if(database_objects[i].get_id() == item_id)
+                database_objects[i].set_object_name(new_name);
+}
