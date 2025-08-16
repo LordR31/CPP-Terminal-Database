@@ -1,21 +1,12 @@
 // main.cpp
 #include <iostream>
-#include "classes/Menu.hpp"
+#include "classes/MenuLogic.hpp"
+#include "classes/MenuUI.hpp"
 #include "utils.hpp"
 
 // for the start-up animaiton
 #include "chrono"
 #include "thread"
-
-#define MAIN_MENU_ID 0
-#define MANAGE_DATABASE_MENU_ID 1
-#define CREATE_DATABASE_MENU_ID 2
-#define LOAD_DATABASE_MENU_ID 3
-#define DELETE_DATABASE_MENU_ID 4
-#define PRINT_AVAILABLE_DATABASES_MENU_ID 5
-#define PRINT_CURRENT_DATABASE_MENU_ID 6
-#define SETTINGS_MENU_ID 7
-#define EXIT_PROGRAM 20
 
 #define END_BRACKET_POSITION_FOR_ANIMATION 24
 
@@ -29,6 +20,7 @@
 
 #define LOADING_FINISHED_TEXT_POSITION 8
 #define WAIT_USER_INPUT_LINE_POSITION 3
+
 using namespace std;
 
 void loading_animation(int position, int delay_ms){
@@ -81,34 +73,34 @@ int main() {
     getch();
     clear();
 
-    Menu main_menu; // init main_menu
+    MenuLogic menu; // init menu logic
 
     int current_menu = 0;
     while(true){ // access the right menu, depending on each function's return
         switch (current_menu){
         case MAIN_MENU_ID:
-            current_menu = main_menu.main_menu();    
+            current_menu = menu.main_menu();    
             break;
-        case MANAGE_DATABASE_MENU_ID:
-            current_menu = main_menu.manage_databases_menu();
+        case MANAGE_DATABASES_MENU_ID:
+            current_menu = menu.manage_databases_menu();
             break;
         case CREATE_DATABASE_MENU_ID:
-            current_menu = main_menu.create_database_menu();
+            current_menu = menu.create_database_menu();
             break;
-        case LOAD_DATABASE_MENU_ID:
-            current_menu = main_menu.load_database_menu();
+        case MANAGE_DATABASE_SUBMENU_ID:
+            current_menu = menu.load_database_menu();
             break;
         case DELETE_DATABASE_MENU_ID:
-            current_menu = main_menu.delete_database_menu();
+            current_menu = menu.delete_database_menu();
             break;
         case PRINT_AVAILABLE_DATABASES_MENU_ID:
-            current_menu = main_menu.available_databases_menu();
+            current_menu = menu.available_databases_menu();
             break;
         case PRINT_CURRENT_DATABASE_MENU_ID:
-            current_menu = main_menu.current_database_menu();
+            current_menu = menu.current_database_menu();
             break;
         case SETTINGS_MENU_ID:
-            current_menu = main_menu.settings_menu();
+            current_menu = menu.settings_menu();
             break;
         case EXIT_PROGRAM:
             endwin(); // terminate ncurses mode
