@@ -24,6 +24,7 @@ add_executable(TerminalDatabaseApp
     src/classes/Database.cpp
     src/classes/MenuUI.cpp
     src/classes/MenuLogic.cpp
+    src/classes/MenuInput.cpp
     src/utils.cpp
 ) 
 

@@ -9,6 +9,7 @@
 #include <vector>
 #include <filesystem>
 #include "MenuUI.hpp"
+#include "MenuInput.hpp"
 #include "Database.hpp"
 #include <filesystem>
 #include "../utils.hpp"
@@ -80,7 +81,8 @@ private:
     
     // VARIABLES, OBJECTS AND VECTORS
 
-    MenuUI menu_ui;                                             
+    MenuUI menu_ui;       
+    MenuInput menu_input;                                      
     std::vector<Database> database_vector;          // holds the available databases
     Database current_database;                      // currently active database that can be worked on
     int current_database_index = 0;                 // index used when creating a new database

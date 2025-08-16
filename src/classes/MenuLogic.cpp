@@ -122,7 +122,7 @@ int MenuLogic::main_menu(){
         if(check_resize())     // check if the window was resized by the user and re-enter the menu to re-draw everything
             return 0;
 
-        int choice = getch();  // get user input
+        int choice = menu_input.get_char();  // get user input
         if(sound)              // make ANNOYING sound if sound turned on
             beep();
 
@@ -149,7 +149,7 @@ int MenuLogic::manage_databases_menu(){
         if(check_resize())                             // check if the window was resized by the user and re-enter the menu to re-draw everything
             return MANAGE_DATABASES_MENU_ID;
 
-        int choice = getch(); // get user input
+        int choice = menu_input.get_char(); // get user input
         if(sound)             // make ANNOYING sound if sound turned on
             beep();
 
@@ -177,15 +177,11 @@ int MenuLogic::manage_databases_menu(){
 
 int MenuLogic::create_database_menu(){
     menu_ui.print_create_database_menu(decorator_type, text_position);
-
-    echo();                                                                                                                            // enable echo 
-    nocbreak();                                                                                                                        // enable buffering
-    char database_name [256];
-    getnstr(database_name, sizeof(database_name) - 1);                                                                                 // get user input
+                                                                                                                // enable buffering
+    string database_name;
+    database_name = menu_input.get_string(255); // get user input
     if(sound)                                                                                                                          // make ANNOYING sound if sound turned on
-        beep();
-    noecho();                                                                                                                          // no echo
-    cbreak();                                                                                                                          // no buffering
+        beep();                                                                                                                        // no buffering
 
     if(check_resize())                                                                                                                 // check if the window was resized by the user and re-enter the menu to re-draw everything
         return CREATE_DATABASE_MENU_ID;
@@ -193,12 +189,12 @@ int MenuLogic::create_database_menu(){
     if(database_name[0] == '\0')                                                                                                       // if the user pressed Enter, go back 
         return MANAGE_DATABASES_MENU_ID;
 
-    string database_path = "files/" + (string)database_name + ".txt";                                                                  // otherwise, create the path to the database 
+    string database_path = "files/" + database_name + ".txt";                                                                  // otherwise, create the path to the database 
 
     if(filesystem::exists(database_path)){  
         menu_ui.print_database_already_exists(text_position);
         while(true){                                                                                                                   // and determine the next course of action
-            int choice = getch();
+            int choice = menu_input.get_char();
             if(choice == ASCII_y || choice == ASCII_Y){      // lower and upper case y in ASCII                                                 // if they want to overwrite
                 ofstream output;                                                          
                 output.open(database_path);                                                                                            // overwrite file
@@ -207,7 +203,7 @@ int MenuLogic::create_database_menu(){
                 output.close();   
                 reload_database_vector();                                                                                              // close the file
                 menu_ui.print_database_created_successfully(text_position);
-                getch();
+                menu_input.get_char();
                 return MANAGE_DATABASES_MENU_ID;
             }else if(choice == ASCII_n || choice == ASCII_N) // lower and upper case n in ASCII                                                   
                 return MANAGE_DATABASES_MENU_ID;                                                                                                              // otherwise, return to Manage Databases Menu
@@ -230,7 +226,7 @@ int MenuLogic::create_database_menu(){
     save_settings();                                                          // save the settings
 
     menu_ui.print_database_created_successfully(text_position);
-    getch();
+    menu_input.get_char();
     return MANAGE_DATABASES_MENU_ID;          // go back to the Database Manager Menu
 }
 
@@ -247,12 +243,12 @@ int MenuLogic::load_database_menu(){
     menu_ui.print_load_database_options(is_empty, is_paged, is_in_find_interface);
         
     if(is_empty){
-        getch();
+        menu_input.get_char();
         return MANAGE_DATABASES_MENU_ID; 
     }
 
     while(true){
-        int choice = getch(); // get user input
+        int choice = menu_input.get_char(); // get user input
         if(check_resize())    // check if the window was resized by the user and re-enter the menu to re-draw everything
             return MANAGE_DATABASE_SUBMENU_ID;
 
@@ -311,12 +307,12 @@ int MenuLogic::delete_database_menu(){
     menu_ui.print_delete_database_menu_options(is_empty, is_paged, is_in_find_interface);
         
     if(is_empty){
-        getch();
+        menu_input.get_char();
         return MANAGE_DATABASES_MENU_ID;
     }
 
     while(true){
-        int choice = getch(); // get user input
+        int choice = menu_input.get_char(); // get user input
         
         if(check_resize())    // check if the window was resized by the user and re-enter the menu to re-draw everything
            return MANAGE_DATABASE_SUBMENU_ID;
@@ -333,8 +329,8 @@ int MenuLogic::delete_database_menu(){
                     menu_ui.print_delete_database_choose_menu(text_position);
                     echo();
                     nocbreak();
-                    char database_choice[3];
-                    getnstr(database_choice, sizeof(database_choice) - 1);
+                    string database_choice;
+                    database_choice = menu_input.get_string(2);
                     noecho();
                     cbreak();
                     if(sound)                                                             // make ANNOYING sound if sound turned on
@@ -358,25 +354,19 @@ int MenuLogic::delete_database_menu(){
                         menu_ui.clear_user_input_zone();
                         
                         //TODO: ADD RESIZE!!!
-                        echo();
-                        nocbreak();
-                        char confirmation[7];                        
-                        getnstr(confirmation, sizeof(confirmation) - 1); // get user input
+                        string confirmation;                      
+                        confirmation = menu_input.get_string(6); // get user input
                         if(check_resize()){                              // check if the window was resized by the user and re-enter the menu to re-draw everything
-                            noecho();                                 // disable echo
-                            cbreak();                                 // disable buffering
                             return DELETE_DATABASE_MENU_ID;
                         }
                         if(sound)                                    // make ANNOYING sound if sound turned on
                             beep(); 
-                        noecho();                                    // no echo
-                        cbreak();                                    // no buffering
                                 
                         if(confirmation[0] == '\0')                  // if the user left blank and pressed Enter, go back
                             return MANAGE_DATABASES_MENU_ID;
-                        else if(strcmp(confirmation, "DELETE") != 0){                                    // if the user unsuccessfully typed "DELETE"
+                        else if(confirmation.compare("DELETE") != 0){                                    // if the user unsuccessfully typed "DELETE"
                                 menu_ui.print_invalid_input(text_position);
-                                getch();
+                                menu_input.get_char();
                                 if(sound)
                                     beep();
                                 return DELETE_DATABASE_MENU_ID;
@@ -386,7 +376,7 @@ int MenuLogic::delete_database_menu(){
                             reload_database_vector();                                                        // reload the database_vector to reflect the changes
                             get_new_database_index();
                             menu_ui.print_delete_database_confirm_deletion_prompt(is_confirmed);
-                            getch();
+                            menu_input.get_char();
                             return MANAGE_DATABASES_MENU_ID;
                         }
                     }
@@ -426,7 +416,7 @@ int MenuLogic::available_databases_menu(){
     menu_ui.print_available_databases_options(is_empty, is_paged);
     
     while(true){
-        int input = getch();                    // wait user input
+        int input = menu_input.get_char();                    // wait user input
         
         if(check_resize())                      // check if the window was resized by the user and re-enter the menu to re-draw everything
             return PRINT_AVAILABLE_DATABASES_MENU_ID;
@@ -468,7 +458,7 @@ int MenuLogic::current_database_menu(){
 
     // determine the next step based on user input
     while(true){
-        int choice = getch();
+        int choice = menu_input.get_char();
         if(check_resize())    // check if the window was resized by the user and re-enter the menu to re-draw everything
             return PRINT_CURRENT_DATABASE_MENU_ID;
         if(sound)             // make ANNOYING sound if sound turned on
@@ -542,7 +532,7 @@ int MenuLogic::current_database_menu(){
 int MenuLogic::settings_menu(){
    menu_ui.print_settings_menu(decorator_type, text_position);
     while(true){
-        int choice = getch(); // wait user input
+        int choice = menu_input.get_char(); // wait user input
         if(check_resize())    // check if the window was resized by the user and re-enter the menu to re-draw everything
             return SETTINGS_MENU_ID;
         if(sound)             // make ANNOYING sound if sound turned on
@@ -555,7 +545,7 @@ int MenuLogic::settings_menu(){
 
             int decorator_choice = 0;
             while(decorator_choice  != ASCII_1 && decorator_choice != ASCII_2 && decorator_choice != ASCII_3 && decorator_choice != ASCII_4){ // until the user pressed a valid key, keep them trapped in an infinite loop
-                decorator_choice = getch();                                                                               // wait user input
+                decorator_choice = menu_input.get_char();                                                                               // wait user input
                 if(check_resize())                                                                                        // check if the window was resized by the user and re-enter the menu to re-draw everything
                     return SETTINGS_MENU_ID;
                 if(sound)                                                                                                 // make ANNOYING sound if sound turned on
@@ -583,7 +573,7 @@ int MenuLogic::settings_menu(){
         case ASCII_2:{                              // Change text alignment 
             menu_ui.print_text_position_settings(text_position);
 
-            int text_choice = getch();
+            int text_choice = menu_input.get_char();
             if(check_resize())                                // check if the window was resized by the user and re-enter the menu to re-draw everything
                 return SETTINGS_MENU_ID;
             if(sound)                                         // make ANNOYING sound if sound turned on
@@ -593,7 +583,7 @@ int MenuLogic::settings_menu(){
                 return SETTINGS_MENU_ID;
             else
                 while(text_choice  != ASCII_1 && text_choice != ASCII_2){ // until the user pressed a valid key, keep them trapped in an infinite loop
-                    text_choice = getch();                      // wait user input
+                    text_choice = menu_input.get_char();                      // wait user input
                     if(check_resize())                          // check if the window was resized by the user and re-enter the menu to re-draw everything
                         return SETTINGS_MENU_ID;
                     if(sound)                                   // make ANNOYING sound if sound turned on
@@ -613,7 +603,7 @@ int MenuLogic::settings_menu(){
         case ASCII_3:{                              // Turn *annoying* Sound ON/OFF
             menu_ui.print_sound_settings(sound);
             
-            int sound_choice = getch();                       // get user input
+            int sound_choice = menu_input.get_char();                       // get user input
             if(check_resize())                                // check if the window was resized by the user and re-enter the menu to re-draw everything
                 return SETTINGS_MENU_ID;
             if(sound)                                         // make ANNOYING sound if sound turned on
@@ -623,7 +613,7 @@ int MenuLogic::settings_menu(){
                 return SETTINGS_MENU_ID;
             else
                 while(sound_choice  != ASCII_1 && sound_choice != ASCII_2){ // until the user pressed a valid key, keep them trapped in an infinite loop
-                    sound_choice = getch();                       // wait user input
+                    sound_choice = menu_input.get_char();                       // wait user input
                     if(check_resize())                            // check if the window was resized by the user and re-enter the menu to re-draw everything
                         return SETTINGS_MENU_ID;
                     if(sound)                                     // make ANNOYING sound if sound turned on
@@ -643,7 +633,7 @@ int MenuLogic::settings_menu(){
         case ASCII_4:{                              // Change number of entries per page
             menu_ui.print_number_of_entries_settings(number_of_entries);
             
-            int entries_choice = getch(); // get user input
+            int entries_choice = menu_input.get_char(); // get user input
             if(check_resize())            // check if the window was resized by the user and re-enter the menu to re-draw everything
                 return SETTINGS_MENU_ID;
             if(sound)                     // make ANNOYING sound if sound turned on 
@@ -653,7 +643,7 @@ int MenuLogic::settings_menu(){
                 return SETTINGS_MENU_ID;
 
             while(entries_choice  != ASCII_1 && entries_choice != ASCII_2 && entries_choice != ASCII_3){ // until the user pressed a valid key, keep them trapped in an infinite loop
-                entries_choice = getch();                                                 // wait user input
+                entries_choice = menu_input.get_char();                                                 // wait user input
                 if(check_resize())                                                        // check if the window was resized by the user and re-enter the menu to re-draw everything
                     return SETTINGS_MENU_ID;
                 if(sound)                                                                 // make ANNOYING sound if sound turned on
@@ -713,7 +703,7 @@ int MenuLogic::settings_menu(){
         //     for(int i = 0; i < 20; i++)
         //         printw("*");
 
-        //     int compact_choice = getch();
+        //     int compact_choice = menu_input.get_char();
         //     if(sound)
         //         beep();
 
@@ -721,7 +711,7 @@ int MenuLogic::settings_menu(){
         //         break;
 
         //     while(compact_choice  != 49 && compact_choice != 50){
-        //         compact_choice = getch();
+        //         compact_choice = menu_input.get_char();
         //         if(sound)
         //             beep();
 
@@ -738,7 +728,7 @@ int MenuLogic::settings_menu(){
         case ASCII_5:{                              // Turn Continuous Mode ON/OFF
             menu_ui.print_continuous_mode_settings(continuous_mode);
             
-            int continuous_choice = getch(); // get user input 
+            int continuous_choice = menu_input.get_char(); // get user input 
             if(check_resize())               // check if the window was resized by the user and re-enter the menu to re-draw everything
                 return SETTINGS_MENU_ID;
             if(sound)                        // make ANNOYING sound if sound turned on   
@@ -748,7 +738,7 @@ int MenuLogic::settings_menu(){
                 return SETTINGS_MENU_ID;
 
             while(continuous_choice  != ASCII_1 && continuous_choice != ASCII_2){ // until the user pressed a valid key, keep them trapped in an infinite loop
-                continuous_choice = getch();                            // wait user input
+                continuous_choice = menu_input.get_char();                            // wait user input
                 if(check_resize())                                      // check if the window was resized by the user and re-enter the menu to re-draw everything
                     return SETTINGS_MENU_ID;
                 if(sound)                                               // make ANNOYING sound if sound turned on 
@@ -783,12 +773,8 @@ bool MenuLogic::edit_database(){
     menu_ui.print_edit_database_menu(text_position);
     if(choose_database()){
         menu_ui.print_edit_database_name();
-        echo();
-        nocbreak();
-        char new_database_name[256];
-        getnstr(new_database_name, sizeof(new_database_name) - 1);
-        noecho();
-        cbreak();
+        string new_database_name;
+        new_database_name = menu_input.get_string(255);
 
         if(new_database_name[0] == '\0')
             return false;
@@ -818,7 +804,7 @@ void MenuLogic::find_database(){
     int counter = 0;
 
     while (true) {
-        int input_char = getch();
+        int input_char = menu_input.get_char();
 
         if (input_char == KEY_BACKSPACE){
             if (counter > 0) {
@@ -846,14 +832,10 @@ void MenuLogic::find_database(){
 
 bool MenuLogic::choose_database(){
     menu_ui.print_choose_database(text_position);
-    echo();
-    nocbreak();
-    char database_choice[3];
-    getnstr(database_choice, sizeof(database_choice) - 1);
+    string database_choice;
+    database_choice = menu_input.get_string(2);
     
     if(database_choice[0] == '\0'){
-        noecho();
-        cbreak();
         return false;
     }
     else{
@@ -889,19 +871,14 @@ bool MenuLogic::delete_database(){
 int MenuLogic::add_object_menu(){
     menu_ui.print_add_object_menu(decorator_type);
     while(true){
-        echo();                              // enable echo 
-        nocbreak();                          // enable buffering
-        char object[256];
-        getnstr(object, sizeof(object) - 1); // get user input
+        string object_string;
+        object_string = menu_input.get_string(255);
         if(check_resize())    // check if the window was resized by the user and re-enter the menu to re-draw everything
             return 0;
         if(sound)                            // make ANNOYING sound if sound turned on
             beep();
-        noecho();                            // no echo
-        cbreak();                            // no buffering
-            
-        string object_string = object;       // make the input a string  
-        if(object[0] == '\0')                // if the user left blank and pressed Enter, go back
+
+        if(object_string.empty())                // if the user left blank and pressed Enter, go back
             break;
 
         stringstream new_object(object_string);
@@ -920,7 +897,6 @@ int MenuLogic::add_object_menu(){
             result = current_database.add_object(temp_name, temp_type, temp_quantity);         // and add it to the database object vector
 
             
-                                              // finally tell the user that the object was added to the database (never really shown cuz no getch() to pause)
         }catch(int errorCode){                                                        // if not possible, tell the user to carefully follow the format
             menu_ui.print_add_object_result(result);
             break;
@@ -934,7 +910,7 @@ int MenuLogic::add_object_menu(){
 bool MenuLogic::delete_object_menu(){
     menu_ui.print_delete_object_menu();
     
-    int choice = getch(); // get user input
+    int choice = menu_input.get_char(); // get user input
     if(check_resize())    // check if the window was resized by the user and re-enter the menu to re-draw everything
         return 1;
     if(sound)             // make ANNOYING sound if sound turned on 
@@ -946,14 +922,9 @@ bool MenuLogic::delete_object_menu(){
     switch(choice){
     case ASCII_1:{                                                                   // 1 -> delete objects by id
         menu_ui.print_delete_by_id();
-
-        echo();                                                                 // echo on
-        nocbreak();                                                             // buffering on
-        char id_to_delete[10];
-        getnstr(id_to_delete, sizeof(id_to_delete));                            // get user input
+        string id_to_delete;
+        id_to_delete = menu_input.get_string(2);                                // get user input
         if(check_resize()){                                                     // check if the window was resized by the user and re-enter the menu to re-draw everything
-            noecho();                                                           // no echo
-            cbreak();                                                           // no buffering
             return 1;
         }
         if(sound)                                                               // make ANNOYING sound if sound turned on   
@@ -969,20 +940,13 @@ bool MenuLogic::delete_object_menu(){
     }
     case ASCII_2:{                                                                   // 2 -> delete objects by name
         menu_ui.print_delete_by_name();
-
-        echo();                                                                 // echo on
-        nocbreak();                                                             // buffering on
-        char name_to_delete[255];
-        getnstr(name_to_delete, sizeof(name_to_delete));                        // get user input
+        string name_to_delete;
+        name_to_delete = menu_input.get_string(255);                            // get user input
         if(check_resize()){                                                     // check if the window was resized by the user and re-enter the menu to re-draw everything
-            noecho();                                                           // no echo
-            cbreak();                                                           // no buffering
             return 1;
         }
         if(sound)                                                               // make ANNOYING sound if sound turned on   
             beep();          
-        noecho();                                                               // no echo
-        cbreak();                                                               // no buffering
 
 
         string string_to_find = "0.";
@@ -994,19 +958,13 @@ bool MenuLogic::delete_object_menu(){
     case ASCII_3:{                                                                   // 3 -> delete objects by type
         menu_ui.print_delete_by_type();
 
-        echo();                                                                 // echo on
-        nocbreak();                                                             // buffering on
-        char type_to_delete[255];
-        getnstr(type_to_delete, sizeof(type_to_delete));                        // get user input
+        string type_to_delete;
+        type_to_delete = menu_input.get_string(255);                        // get user input
         if(check_resize()){                                                     // check if the window was resized by the user and re-enter the menu to re-draw everything
-            noecho();                                                           // no echo
-            cbreak();                                                           // no buffering
             return 1;
         }
         if(sound)                                                               // make ANNOYING sound if sound turned on   
             beep();
-        noecho();                                                               // no echo
-        cbreak();                                                               // no buffering
 
         string string_to_find = "1.";
         string_to_find += type_to_delete;
@@ -1022,14 +980,10 @@ bool MenuLogic::delete_object_menu(){
 void MenuLogic::edit_object_menu(){
     menu_ui.print_edit_object_menu();
 
-    echo();                                                                                                                            // enable echo 
-    nocbreak();                                                                                                                        // enable buffering
-    char object_id [256];
-    getnstr(object_id, sizeof(object_id) - 1);                                                                                 // get user input
+    string object_id;
+    object_id = menu_input.get_string(255);                                                                                 // get user input
     if(sound)                                                                                                                          // make ANNOYING sound if sound turned on
-        beep();
-    noecho();                                                                                                                          // no echo
-    cbreak();                                                                                                                          // no buffering
+        beep();                                                                                                                     // no buffering
 
     if(check_resize())                                                                                                                 // check if the window was resized by the user and re-enter the menu to re-draw everything
         return;
@@ -1038,14 +992,10 @@ void MenuLogic::edit_object_menu(){
         return;
     
     menu_ui.print_edit_object(decorator_type, stoi(object_id), current_database);
-    echo();                                                                                                                            // enable echo 
-    nocbreak();                                                                                                                        // enable buffering
-    char new_features [256];
-    getnstr(new_features, sizeof(new_features) - 1);                                                                                 // get user input
+    string new_features;
+    new_features = menu_input.get_string(255);                                                                                // get user input
     if(sound)                                                                                                                          // make ANNOYING sound if sound turned on
         beep();
-    noecho();                                                                                                                          // no echo
-    cbreak();
 
     if(new_features[0] == '\0')                                                                                                       // if the user pressed Enter, go back 
         return;
@@ -1112,7 +1062,7 @@ void MenuLogic::find_object_menu(){
     vector<Object> found_objects;
 
     while (true) {
-        int input_char = getch();
+        int input_char = menu_input.get_char();
 
         if (input_char == KEY_BACKSPACE){
             if (counter > 0) {
