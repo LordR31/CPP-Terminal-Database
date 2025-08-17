@@ -9,11 +9,9 @@ This project can be compiled and used on Linux & Windows
 ## Compilation on Linux
 
 To compile on Linux, after cloning the repo, the user has to install ncurses and CMake.
-Afterwards, create a build folder from project root and run the CMake command:
+Afterwards, simply use the CMake command:
 
-`mkdir build`             -> Create the folder
-
-`cmake -S src -B build`   -> Tell CMake to use the src folder to build the app:
+`cmake --preset linux`
 
 Then navigate into the build folder and run the build command:
 
@@ -43,21 +41,17 @@ After this, simply use vcpkg to install PDCurses:
 
 The last steps are similar to the Linux method. 
 
-Go into the root folder of the project and create a build folder and use the CMake command:
+Go into the root folder of the project and run the CMake command with the windows preset
 
-`mkdir build`
+`cmake --preset windows`
 
-`cmake -B build -S src -DCMAKE_TOOLCHAIN_FILE="*path/to/vcpkg*/scripts/buildsystems/vcpkg.cmake"`
-
-Navigate into the build folder
+Navigate into the build folder and run the build command
 
 `cd build`
 
-And run the build commad
-
 `cmake --build .`
 
-This will create the app executable and dependencies in the root folder. To run the app simply go out of the build folder and use the command:
+This will create the app executable and dependencies in the root folder. From here, simply go out of the build folder and run the app:
 
 `cd ..`
 
