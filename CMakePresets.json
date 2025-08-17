@@ -8,7 +8,7 @@
       "binaryDir": "${sourceDir}/build/",
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": {
-          "value": "C:/Users/visoi/vcpkg/scripts/buildsystems/vcpkg.cmake"
+          "value": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
         }
       },
       "generator": "Visual Studio 17 2022"
