@@ -548,7 +548,7 @@ void MenuUI::print_delete_database_menu_options(bool is_empty, bool is_paged, bo
         }
 
         if(is_paged & (!show_clear_button)){
-            temp_string = "3 - Next Page";
+            temp_string = "4 - Next Page";
             move(USER_INPUT_LINE, current_position);
             printw("%s", temp_string.c_str());
         }

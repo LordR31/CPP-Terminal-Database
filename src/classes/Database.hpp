@@ -21,7 +21,7 @@ public:
     Database(const int& id, const std::string& name);                  // Database constructor for "create_database()"
     
     int get_database_id();
-    const std::string& get_database_name();
+    const std::string& get_database_name() const;
     int get_number_of_objects();
     std::vector<Object> get_database_objects();                        // Prints the database
     int get_next_object_id();
@@ -29,22 +29,20 @@ public:
 
     void set_database_name(const std::string& new_name);
 
-    void load_database(const std::string& database_identifiers);       // Loads database identifiers & objects from file
-    void save_database();                                              // Saved database to file
-    bool delete_database();                                            // Deletes the database & file
+    virtual void load_database(const std::string& database_identifiers);       // Loads database identifiers & objects from file
+    virtual void save_database();                                              // Saved database to file
+    virtual bool delete_database();                                            // Deletes the database & file
 
-    bool add_object(const std::string& name, const std::string& type, int quantity); // Adds object to database
-    bool delete_object(int id_to_find);                                // Deletes objects from database
-    bool delete_object(const std::string& string_to_find);
+    virtual bool add_object(const std::string& name, const std::string& type, int quantity); // Adds object to database
+    virtual bool delete_object(int id_to_find);                                // Deletes objects from database
+    virtual bool delete_object(const std::string& string_to_find);
     
-    std::vector<Object> find_object_by_id(const std::string& match_word);
-    std::vector<Object> find_object_by_name(const std::string& match_word);
-    std::vector<Object> find_object_by_type(const std::string& match_word);
-    std::vector<Object> find_object_by_quantity(const std::string& match_word);
+    virtual std::vector<Object> find_object_by_id(const std::string& match_word);
+    virtual std::vector<Object> find_object_by_name(const std::string& match_word);
+    virtual std::vector<Object> find_object_by_type(const std::string& match_word);
+    virtual std::vector<Object> find_object_by_quantity(const std::string& match_word);
 
-    void edit_object(int item_id, const std::string& new_name, const std::string& new_type, int new_quantity);
-    void edit_object(int item_id, const std::string& new_name, const std::string& new_type);
-    void edit_object(int item_id, const std::string& new_name);
+    virtual void edit_object(int item_id, const std::string& new_name, const std::string& new_type, int new_quantity, bool is_name, bool is_type, bool is_quantity);
     
     bool operator<(const Database& database_object);
 private: 

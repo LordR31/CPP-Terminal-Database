@@ -3,7 +3,8 @@
 
 using namespace std;
 
-MenuLogic::MenuLogic(){
+MenuLogic::MenuLogic(MenuInput& user_input, MenuUI& ui) : menu_input(user_input), menu_ui(ui){
+
     string input_settings = "program_settings.txt"; // path to program_settings
     ifstream input;
 
@@ -115,34 +116,77 @@ MenuLogic::MenuLogic(){
         }
 }
 
+// GETTERS
+vector<Database> MenuLogic::get_database_vector(){
+    return database_vector;
+}
+
+Database MenuLogic::get_current_database(){
+    return current_database;
+}
+
+int MenuLogic::get_current_database_index(){
+    return current_database_index;
+}
+
+int MenuLogic::get_page_number(){
+    return page_number;
+}
+
+char MenuLogic::get_decorator_type(){
+    return decorator_type;
+}
+
+bool MenuLogic::get_text_position(){
+    return text_position;
+}
+
+bool MenuLogic::get_sound(){
+    return sound;
+}
+
+int MenuLogic::get_number_of_entries(){
+    return number_of_entries;
+}
+
+bool MenuLogic::get_continuous_mode(){
+    return continuous_mode;
+}
+
+int MenuLogic::get_current_menu_id(){
+    return current_menu_id;
+}
+
 // MAIN FUNCTIONS
 int MenuLogic::main_menu(){
+    current_menu_id = MAIN_MENU_ID;
+
     menu_ui.print_main_menu(decorator_type, text_position);
-    while(true){
-        if(check_resize())     // check if the window was resized by the user and re-enter the menu to re-draw everything
-            return 0;
+    
+    int choice = menu_input.get_char();  // get user input
+    if(check_resize())     // check if the window was resized by the user and re-enter the menu to re-draw everything
+        return MAIN_MENU_ID;
+    if(sound)              // make ANNOYING sound if sound turned on
+        beep();
 
-        int choice = menu_input.get_char();  // get user input
-        if(sound)              // make ANNOYING sound if sound turned on
-            beep();
-
-        // determine the next step based on user input
-        switch (choice){
-        case ASCII_1: //    Enter Manager Databases Menu
-            return MANAGE_DATABASES_MENU_ID;
-            break;
-        case ASCII_2: //    Enter Settings Menu
-            return SETTINGS_MENU_ID;
-            break;
-        case ASCII_3: //    Exit program!
-            return EXIT_PROGRAM;
-        default:
-            break;
-        }
+    // determine the next step based on user input
+    switch (choice){
+    case ASCII_1: //    Enter Manager Databases Menu
+        return MANAGE_DATABASES_MENU_ID;
+        break;
+    case ASCII_2: //    Enter Settings Menu
+        return SETTINGS_MENU_ID;
+        break;
+    case ASCII_3: //    Exit program!
+        return EXIT_PROGRAM;
+    default:
+        return MAIN_MENU_ID;
     }
 }
 
 int MenuLogic::manage_databases_menu(){
+    current_menu_id = MANAGE_DATABASES_MENU_ID;
+    
     page_number = 0; // reset all_database_page_number
     menu_ui.print_manage_databases_menu(decorator_type, text_position);
     while(true){    
@@ -176,6 +220,8 @@ int MenuLogic::manage_databases_menu(){
 }
 
 int MenuLogic::create_database_menu(){
+    current_menu_id = CREATE_DATABASE_MENU_ID;
+    
     menu_ui.print_create_database_menu(decorator_type, text_position);
                                                                                                                 // enable buffering
     string database_name;
@@ -231,6 +277,8 @@ int MenuLogic::create_database_menu(){
 }
 
 int MenuLogic::load_database_menu(){
+    current_menu_id = MANAGE_DATABASE_SUBMENU_ID;
+
     bool is_paged = false;
     bool is_empty = database_vector.empty();
     bool is_in_find_interface = false;
@@ -247,7 +295,6 @@ int MenuLogic::load_database_menu(){
         return MANAGE_DATABASES_MENU_ID; 
     }
 
-    while(true){
         int choice = menu_input.get_char(); // get user input
         if(check_resize())    // check if the window was resized by the user and re-enter the menu to re-draw everything
             return MANAGE_DATABASE_SUBMENU_ID;
@@ -255,46 +302,45 @@ int MenuLogic::load_database_menu(){
         if(sound)             // make ANNOYING sound if sound turned on 
             beep();
 
-        switch (choice){
-            case ASCII_1:
-                if(is_paged & ~is_in_find_interface)                                                                                                        // if the button is shown (there are pages)
-                    decrement_page(true);
+    switch (choice){
+        case ASCII_1:
+            if(is_paged & ~is_in_find_interface)                                                                                                        // if the button is shown (there are pages)
+                decrement_page(true);
+            return MANAGE_DATABASE_SUBMENU_ID;
+        case ASCII_2:
+            if(choose_database())
+                return PRINT_CURRENT_DATABASE_MENU_ID;
+            else
                 return MANAGE_DATABASE_SUBMENU_ID;
-            case ASCII_2:
-                if(choose_database())
-                    return PRINT_CURRENT_DATABASE_MENU_ID;
-                else
-                    return MANAGE_DATABASE_SUBMENU_ID;
-            case ASCII_3:
-                if(is_in_find_interface){
-                    return MANAGE_DATABASE_SUBMENU_ID;
-                }else{
-                    find_database();
-                    menu_ui.clear_user_input_zone();
-                    is_in_find_interface = true;
-                    menu_ui.print_load_database_options(is_empty, is_paged, is_in_find_interface);
-                }
-                continue;
-            case ASCII_4:
-                if(edit_database()){
-                    update_index_manager();
-                    reload_database_vector();
-                }
+        case ASCII_3:
+            if(is_in_find_interface){
                 return MANAGE_DATABASE_SUBMENU_ID;
-            case ASCII_5:
-                if(is_paged & (!is_in_find_interface))                                                                                                     // if the button is shown (there are pages)            
-                    increment_page(true);                                                                                 // otherwise just ignore this input
-                return MANAGE_DATABASE_SUBMENU_ID; 
-            case ASCII_ENTER:
-                return MANAGE_DATABASES_MENU_ID;
-            default:
-                continue;
-        }
+            }else{
+                find_database();
+                menu_ui.clear_user_input_zone();
+                is_in_find_interface = true;
+                menu_ui.print_load_database_options(is_empty, is_paged, is_in_find_interface);
+            }
+            return MANAGE_DATABASE_SUBMENU_ID;
+        case ASCII_4:
+            if(edit_database())
+                update_index_manager();
+            return MANAGE_DATABASE_SUBMENU_ID;
+        case ASCII_5:
+            if(is_paged & (!is_in_find_interface))                                                                                                     // if the button is shown (there are pages)            
+                increment_page(true);                                                                                 // otherwise just ignore this input
+            return MANAGE_DATABASE_SUBMENU_ID; 
+        case ASCII_ENTER:
+            return MANAGE_DATABASES_MENU_ID;
+        default:
+            MANAGE_DATABASE_SUBMENU_ID;
     }
     return PRINT_CURRENT_DATABASE_MENU_ID;                                                                              // go to Print Current Database Menu
 }
 
 int MenuLogic::delete_database_menu(){
+    current_menu_id = DELETE_DATABASE_MENU_ID;
+
     bool is_paged = false;
     bool is_empty = database_vector.empty();
     bool is_in_find_interface = false;
@@ -311,100 +357,99 @@ int MenuLogic::delete_database_menu(){
         return MANAGE_DATABASES_MENU_ID;
     }
 
-    while(true){
-        int choice = menu_input.get_char(); // get user input
-        
-        if(check_resize())    // check if the window was resized by the user and re-enter the menu to re-draw everything
-           return MANAGE_DATABASE_SUBMENU_ID;
+    int choice = menu_input.get_char(); // get user input
+    if(check_resize())    // check if the window was resized by the user and re-enter the menu to re-draw everything
+       return MANAGE_DATABASE_SUBMENU_ID;
 
-        if(sound)             // make ANNOYING sound if sound turned on 
-           beep();
+    if(sound)             // make ANNOYING sound if sound turned on 
+       beep();
 
-        switch (choice){
-                case ASCII_1:
-                    if(is_paged)
-                       decrement_page(true);
+    switch (choice){
+            case ASCII_1:
+                if(is_paged)
+                   decrement_page(true);
+                return DELETE_DATABASE_MENU_ID;
+            case ASCII_2:{
+                menu_ui.print_delete_database_choose_menu(text_position);
+                echo();
+                nocbreak();
+                string database_choice;
+                database_choice = menu_input.get_string(2);
+                noecho();
+                cbreak();
+                if(sound)                                                             // make ANNOYING sound if sound turned on
+                    beep();
+
+                if(database_choice[0] == '\0')                                                // if the user pressed Enter, go back
                     return DELETE_DATABASE_MENU_ID;
-                case ASCII_2:{
-                    menu_ui.print_delete_database_choose_menu(text_position);
-                    echo();
-                    nocbreak();
-                    string database_choice;
-                    database_choice = menu_input.get_string(2);
-                    noecho();
-                    cbreak();
-                    if(sound)                                                             // make ANNOYING sound if sound turned on
-                        beep();
-
-                    if(database_choice[0] == '\0')                                                // if the user pressed Enter, go back
-                        return DELETE_DATABASE_MENU_ID;
-                    else {
-                        for(int i = 0; i < static_cast<int>(database_vector.size()); i++)
-                            if(stoi(database_choice) == database_vector[i].get_database_id()){
-                                current_database = database_vector[i];
-                                break;
-                            }else if(i == static_cast<int>(database_vector.size())){
-                                menu_ui.print_invalid_input(text_position);
-                                return DELETE_DATABASE_MENU_ID;
-                            }
-                    }
-                    
-                    menu_ui.print_delete_database_confirm_deletion_menu();
-                    while(true){
-                        menu_ui.clear_user_input_zone();
-                        
-                        //TODO: ADD RESIZE!!!
-                        string confirmation;                      
-                        confirmation = menu_input.get_string(6); // get user input
-                        if(check_resize()){                              // check if the window was resized by the user and re-enter the menu to re-draw everything
+                else {
+                    for(int i = 0; i < static_cast<int>(database_vector.size()); i++)
+                        if(stoi(database_choice) == database_vector[i].get_database_id()){
+                            current_database = database_vector[i];
+                            break;
+                        }else if(i == static_cast<int>(database_vector.size())){
+                            menu_ui.print_invalid_input(text_position);
                             return DELETE_DATABASE_MENU_ID;
                         }
-                        if(sound)                                    // make ANNOYING sound if sound turned on
-                            beep(); 
-                                
-                        if(confirmation[0] == '\0')                  // if the user left blank and pressed Enter, go back
-                            return MANAGE_DATABASES_MENU_ID;
-                        else if(confirmation.compare("DELETE") != 0){                                    // if the user unsuccessfully typed "DELETE"
-                                menu_ui.print_invalid_input(text_position);
-                                menu_input.get_char();
-                                if(sound)
-                                    beep();
-                                return DELETE_DATABASE_MENU_ID;
-                        }else{
-                            bool is_confirmed = delete_database();                                                            
-                            update_index_manager();
-                            reload_database_vector();                                                        // reload the database_vector to reflect the changes
-                            get_new_database_index();
-                            menu_ui.print_delete_database_confirm_deletion_prompt(is_confirmed);
-                            menu_input.get_char();
-                            return MANAGE_DATABASES_MENU_ID;
-                        }
-                    }
-                    return DELETE_DATABASE_MENU_ID;
                 }
-                case ASCII_3:
-                    if(is_in_find_interface){
+                
+                menu_ui.print_delete_database_confirm_deletion_menu();
+                while(true){
+                    menu_ui.clear_user_input_zone();
+                    
+                    //TODO: ADD RESIZE!!!
+                    string confirmation;                      
+                    confirmation = menu_input.get_string(6); // get user input
+                    if(check_resize()){                              // check if the window was resized by the user and re-enter the menu to re-draw everything
                         return DELETE_DATABASE_MENU_ID;
-                    }else{
-                        find_database();
-                        menu_ui.clear_user_input_zone();
-                        is_in_find_interface = true;
-                        menu_ui.print_delete_database_menu_options(is_empty, is_paged, is_in_find_interface);
                     }
-                    continue;
-                case ASCII_4:
-                    increment_page(true);                                                                                                  // otherwise just ignore this input
+                    if(sound)                                    // make ANNOYING sound if sound turned on
+                        beep(); 
+                            
+                    if(confirmation[0] == '\0')                  // if the user left blank and pressed Enter, go back
+                        return MANAGE_DATABASES_MENU_ID;
+                    else if(confirmation.compare("DELETE") != 0){                                    // if the user unsuccessfully typed "DELETE"
+                            menu_ui.print_invalid_input(text_position);
+                            menu_input.get_char();
+                            if(sound)
+                                beep();
+                            return DELETE_DATABASE_MENU_ID;
+                    }else{
+                        bool is_confirmed = delete_database();     
+                        update_index_manager();
+                        reload_database_vector();                                                        // reload the database_vector to reflect the changes
+                        get_new_database_index();                                                       
+                        menu_ui.print_delete_database_confirm_deletion_prompt(is_confirmed);
+                        menu_input.get_char();
+                        return MANAGE_DATABASES_MENU_ID;
+                    }
+                }
+                return DELETE_DATABASE_MENU_ID;
+            }
+            case ASCII_3:
+                if(is_in_find_interface){
                     return DELETE_DATABASE_MENU_ID;
-                case ASCII_ENTER:
-                    return MANAGE_DATABASES_MENU_ID;
-                 default:
-                     continue;
-        }
+                }else{
+                    find_database();
+                    menu_ui.clear_user_input_zone();
+                    is_in_find_interface = true;
+                    menu_ui.print_delete_database_menu_options(is_empty, is_paged, is_in_find_interface);
+                }
+                return DELETE_DATABASE_MENU_ID;
+            case ASCII_4:
+                increment_page(true);                                                                                                  // otherwise just ignore this input
+                return DELETE_DATABASE_MENU_ID;
+            case ASCII_ENTER:
+                return MANAGE_DATABASES_MENU_ID;
+             default:
+                 MANAGE_DATABASES_MENU_ID;
     }
     return MANAGE_DATABASES_MENU_ID;                                                                                // return to Manage Databases Menu
 }
 
-int MenuLogic::available_databases_menu(){
+int MenuLogic::available_databases_menu(){    
+    current_menu_id = PRINT_AVAILABLE_DATABASES_MENU_ID;
+
     bool is_empty = database_vector.empty();
     bool is_paged = false;
 
@@ -415,34 +460,36 @@ int MenuLogic::available_databases_menu(){
     menu_ui.print_available_databases_menu(decorator_type, text_position, number_of_entries, is_empty, is_paged, page_number, database_vector);
     menu_ui.print_available_databases_options(is_empty, is_paged);
     
-    while(true){
-        int input = menu_input.get_char();                    // wait user input
-        
-        if(check_resize())                      // check if the window was resized by the user and re-enter the menu to re-draw everything
-            return PRINT_AVAILABLE_DATABASES_MENU_ID;
-        if(sound)                               // make ANNOYING sound if sound turned on
-            beep();
-        switch (input){
-        case ASCII_1:{
-            if(is_paged)                                                                                                       // if the button is shown (there are pages)
-                decrement_page(true);
-            return PRINT_AVAILABLE_DATABASES_MENU_ID;
-        }
-        case ASCII_3:{
-            if(is_paged)   
-                increment_page(true);                                                                                                   // if the button is shown (there are pages)                                                                                                            // otherwise just ignore this input
-            return PRINT_AVAILABLE_DATABASES_MENU_ID;
-        }  
-        case ASCII_ENTER:
-            return MANAGE_DATABASES_MENU_ID;
-        default:
-            continue;
-        }
+    int input = menu_input.get_char();                    // wait user input
+
+    if(check_resize())                      // check if the window was resized by the user and re-enter the menu to re-draw everything
+        return PRINT_AVAILABLE_DATABASES_MENU_ID;
+    if(sound)                               // make ANNOYING sound if sound turned on
+        beep();
+    switch (input){
+    case ASCII_1:{
+
+        if(is_paged)                                                                                                       // if the button is shown (there are pages)
+            decrement_page(true);
+        return PRINT_AVAILABLE_DATABASES_MENU_ID;
+    }
+    case ASCII_3:{
+
+        if(is_paged)   
+            increment_page(true);                                                                                                   // if the button is shown (there are pages)                                                                                                            // otherwise just ignore this input
+        return PRINT_AVAILABLE_DATABASES_MENU_ID;
+    }  
+    case ASCII_ENTER:
+        return MANAGE_DATABASES_MENU_ID;
+    default:
+        return PRINT_AVAILABLE_DATABASES_MENU_ID;
     }
     return MANAGE_DATABASES_MENU_ID;                               // return to Manage Databases Menu
 }
 
 int MenuLogic::current_database_menu(){
+    current_menu_id = PRINT_CURRENT_DATABASE_MENU_ID;
+    
     vector<Object> current_database_objects = current_database.get_database_objects();
 
     bool is_paged = false;
@@ -474,7 +521,6 @@ int MenuLogic::current_database_menu(){
                 while(status == 0)
                     status = add_object_menu();
                 current_database.save_database();
-                reload_database_vector();
                 return PRINT_CURRENT_DATABASE_MENU_ID;
             }
             case ASCII_3:{                                                                                                                // 3 -> Delete item from database
@@ -486,8 +532,7 @@ int MenuLogic::current_database_menu(){
                 else if(status == 1){
                     int final_size = current_database.get_number_of_objects();
                     menu_ui.print_current_database_menu_delete_object_prompt(initial_size - final_size);
-                    current_database.save_database();                                                                                    // save database changes
-                    reload_database_vector();                                                                                            // and reload the vector
+                    current_database.save_database();                                                                                    // save database changes                                                                                          // and reload the vector
                 }
                 return PRINT_CURRENT_DATABASE_MENU_ID;
             }
@@ -507,7 +552,6 @@ int MenuLogic::current_database_menu(){
             case ASCII_5:{
                 edit_object_menu();
                 current_database.save_database();
-                reload_database_vector();
                 return PRINT_CURRENT_DATABASE_MENU_ID;
             }
             case ASCII_ENTER:
@@ -529,9 +573,10 @@ int MenuLogic::current_database_menu(){
     return MANAGE_DATABASE_SUBMENU_ID; // return to load database menu
 }
 
-int MenuLogic::settings_menu(){
-   menu_ui.print_settings_menu(decorator_type, text_position);
-    while(true){
+int MenuLogic::settings_menu(){  
+    current_menu_id = SETTINGS_MENU_ID;
+
+    menu_ui.print_settings_menu(decorator_type, text_position);
         int choice = menu_input.get_char(); // wait user input
         if(check_resize())    // check if the window was resized by the user and re-enter the menu to re-draw everything
             return SETTINGS_MENU_ID;
@@ -542,7 +587,7 @@ int MenuLogic::settings_menu(){
         switch (choice){
         case ASCII_1:{                              // Change decorator type
             menu_ui.print_decorator_settings(decorator_type);
-
+            
             int decorator_choice = 0;
             while(decorator_choice  != ASCII_1 && decorator_choice != ASCII_2 && decorator_choice != ASCII_3 && decorator_choice != ASCII_4){ // until the user pressed a valid key, keep them trapped in an infinite loop
                 decorator_choice = menu_input.get_char();                                                                               // wait user input
@@ -552,21 +597,21 @@ int MenuLogic::settings_menu(){
                     beep();
 
                 if(decorator_choice == ASCII_ENTER)                                                                                // if the user pressed Enter, go back and free them
-                    break;
+                    return SETTINGS_MENU_ID;
             }
             switch (decorator_choice){                                                                                    // based on user choice, change the decorator type
             case ASCII_1:
                 decorator_type = '*';
-                break;
+                return SETTINGS_MENU_ID;
             case ASCII_2:
                 decorator_type = '~';
-                break;
+                return SETTINGS_MENU_ID;
             case ASCII_3:
                 decorator_type = '+';
-                break;
+                return SETTINGS_MENU_ID;
             case ASCII_4:
                 decorator_type = '/';
-                break;
+                return SETTINGS_MENU_ID;
             }
             return SETTINGS_MENU_ID;
         }
@@ -578,7 +623,7 @@ int MenuLogic::settings_menu(){
                 return SETTINGS_MENU_ID;
             if(sound)                                         // make ANNOYING sound if sound turned on
                 beep();
-            
+
             if(text_choice == ASCII_ENTER)
                 return SETTINGS_MENU_ID;
             else
@@ -594,9 +639,9 @@ int MenuLogic::settings_menu(){
                 }
 
             // determine the next step based on user input
-            if(text_choice == ASCII_2)      // if 1, align the text left side
+            if(text_choice == ASCII_2)      // if text_choice == 2, align center the text
                 text_position = false;
-            else                       // otherwise, center the text
+            else                            // otherwise, align it left side
                 text_position = true;
             return SETTINGS_MENU_ID;                  
         }
@@ -657,10 +702,10 @@ int MenuLogic::settings_menu(){
             switch (entries_choice){
             case ASCII_1:                   // if 1, change number of entries to 3                 
                 number_of_entries = 3;
-                break;
+                return SETTINGS_MENU_ID;
             case ASCII_2:                   // if 2, change number of entries to 5
                 number_of_entries = 5;
-                break;
+                return SETTINGS_MENU_ID;
             case ASCII_3:                   // if 3, change number of entries to 7
                 number_of_entries = 7;
             }
@@ -762,8 +807,11 @@ int MenuLogic::settings_menu(){
         case ASCII_ENTER:{            // return to main menu
             return MAIN_MENU_ID;
         }
-        }
+        default:
+            return SETTINGS_MENU_ID;
+
     }
+    return SETTINGS_MENU_ID;
 }
 
 // SUB-MENU FUNCTIONS
@@ -796,6 +844,7 @@ bool MenuLogic::edit_database(){
     }
     return false;
 
+    reload_database_vector();
 }
 
 void MenuLogic::find_database(){
@@ -904,6 +953,7 @@ int MenuLogic::add_object_menu(){
         menu_ui.print_add_object_result(result);
         break;
     }
+    reload_database_vector();
     return 1;
 }
 
@@ -970,9 +1020,12 @@ bool MenuLogic::delete_object_menu(){
         string_to_find += type_to_delete;
 
         bool is_confirmed = current_database.delete_object(string_to_find);     // try to delete and get confirmation
-        if(is_confirmed)
+        if(is_confirmed){
+            reload_database_vector();
             return 1;                                                           // return confirmation
-    }}
+        }    
+    }
+}
 
     return 0;
 }
@@ -985,10 +1038,7 @@ void MenuLogic::edit_object_menu(){
     if(sound)                                                                                                                          // make ANNOYING sound if sound turned on
         beep();                                                                                                                     // no buffering
 
-    if(check_resize())                                                                                                                 // check if the window was resized by the user and re-enter the menu to re-draw everything
-        return;
-
-    if(object_id[0] == '\0')                                                                                                       // if the user pressed Enter, go back 
+    if (check_resize() || object_id.empty()) 
         return;
     
     menu_ui.print_edit_object(decorator_type, stoi(object_id), current_database);
@@ -996,61 +1046,38 @@ void MenuLogic::edit_object_menu(){
     new_features = menu_input.get_string(255);                                                                                // get user input
     if(sound)                                                                                                                          // make ANNOYING sound if sound turned on
         beep();
-
-    if(new_features[0] == '\0')                                                                                                       // if the user pressed Enter, go back 
+    
+    if(new_features.empty())                                                                                                       // if the user pressed Enter, go back 
         return;
 
-    bool is_name = true;
-    bool is_type = true;
-    bool is_quantity = true;
-
-    if(new_features[0] == ' ')
-        is_name = false;
-    
-    if(new_features[1] == ' ')
-        is_type = false;
-
-    if(new_features[2] == ' ')
-        is_quantity = false;
-
     stringstream new_object(new_features);
-    vector<string> temp_object;
-    string temp_object_feature;
 
     string new_name;
     string new_type;
-    int new_quantity;
+    string new_quantity_str;
 
-    while(getline(new_object, temp_object_feature, ' ')){                          // so long as there are features to remove from that input line
-        temp_object.push_back(temp_object_feature);                                // extract them into a vector
-    }
+    bool is_name = false;
+    bool is_type = false;
+    bool is_quantity = false;
 
-    if(is_name){
-        new_name = temp_object[0];
-        if(is_type){
-            new_type = temp_object[1];
-            if(is_quantity)
-                new_quantity = stoi(temp_object[2]);
-        }else if(is_quantity)
-            new_quantity = stoi(temp_object[1]);
-    }else if(is_type){
-        new_type = temp_object[0];
-        if(is_quantity)
-            new_quantity = stoi(temp_object[1]);
-    }else
-        new_quantity = stoi(temp_object[0]);
+    if (getline(new_object, new_name, ' '))
+        if (!new_name.empty())
+            is_name = true;
 
-    if(is_name)
-        if(is_type)
-            if(is_quantity)
-                current_database.edit_object(stoi(object_id), new_name, new_type, new_quantity);
-            else
-                current_database.edit_object(stoi(object_id), new_name, new_type);
-        else
-            current_database.edit_object(stoi(object_id), new_name);
-    else
-        return;
+    if (getline(new_object, new_type, ' '))
+        if (!new_type.empty())
+            is_type = true;
 
+    if (getline(new_object, new_quantity_str, ' '))
+        if (!new_quantity_str.empty())
+            is_quantity = true;
+
+    int new_quantity = 0;
+    if(is_quantity)
+        new_quantity = stoi(new_quantity_str);
+
+    current_database.edit_object(stoi(object_id), new_name, new_type, new_quantity, is_name, is_type, is_quantity);
+    reload_database_vector();
 }
 
 void MenuLogic::find_object_menu(){

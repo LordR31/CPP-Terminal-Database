@@ -8,8 +8,8 @@
 
 class MenuInput{
 public:
-    char get_char();
-    std::string get_string(int read_size);
+    virtual int get_char();
+    virtual std::string get_string(int read_size);
 };
 
 #endif // MENU Input

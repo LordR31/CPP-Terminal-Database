@@ -24,6 +24,7 @@
 #define SETTINGS_MENU_ID 7
 #define EXIT_PROGRAM 20
 
+#define ASCII_0 48
 #define ASCII_1 49
 #define ASCII_2 50
 #define ASCII_3 51
@@ -32,6 +33,7 @@
 #define ASCII_6 54
 #define ASCII_7 55
 #define ASCII_ENTER 10
+#define ASCII_WS 32
 
 #define ASCII_y 121
 #define ASCII_Y 89
@@ -40,7 +42,19 @@
 
 class MenuLogic{
 public:
-    MenuLogic();
+    MenuLogic(MenuInput& user_input, MenuUI& ui);
+
+    // GETTERS
+    std::vector<Database> get_database_vector();
+    Database get_current_database();
+    int get_current_database_index();
+    int get_page_number();
+    char get_decorator_type();
+    bool get_text_position();
+    bool get_sound();
+    int get_number_of_entries();
+    bool get_continuous_mode();
+    int get_current_menu_id();
 
     // MAIN FUNCTIONS
     int main_menu();                // Main Menu
@@ -52,14 +66,13 @@ public:
     int current_database_menu();    // Current Database Menu
     int settings_menu();            // Settings Menu
 
-private:
     // SUB-MENU FUNCTIONS
-    
+
     // Manage Databases Functions
     bool edit_database();
     void find_database();
     bool choose_database();
-
+    
     // Delete Database Functions
     bool delete_database();
     
@@ -72,7 +85,7 @@ private:
     // SPECIAL FUNCTIONS
     void decrement_page(bool is_database);
     void increment_page(bool is_database);
- 
+private:
     std::vector<Database> match_word(const std::string& input_word);
     void update_index_manager();
     void get_new_database_index();
@@ -80,9 +93,9 @@ private:
     void reload_database_vector(); // Reload database vector
     
     // VARIABLES, OBJECTS AND VECTORS
-
-    MenuUI menu_ui;       
-    MenuInput menu_input;                                      
+    int current_menu_id = 0;
+    MenuInput& menu_input;                                      
+    MenuUI& menu_ui;       
     std::vector<Database> database_vector;          // holds the available databases
     Database current_database;                      // currently active database that can be worked on
     int current_database_index = 0;                 // index used when creating a new database
@@ -96,7 +109,7 @@ private:
                                           // 3 - +
                                           // 4 - /
 
-    bool text_position = 0;               // Text aligmnent
+    bool text_position = 1;               // Text aligmnent
                                           // 1 - Left side (Default)
                                           // 0 - Centered
     
@@ -115,9 +128,8 @@ private:
                                           //               OFF (Default)
                                           //               ON  
     
-    bool continuous_mode = false;         // Enable going from the last page to the first
+    bool continuous_mode = true;          // Enable going from the last page to the first
                                           // and vice-versa by going next or previous
-
 };
 
 #endif // MENU LOGIC

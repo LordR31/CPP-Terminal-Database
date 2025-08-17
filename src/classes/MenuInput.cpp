@@ -4,8 +4,8 @@
 
 using namespace std;
 
-char MenuInput::get_char(){
-    char user_input = getch();
+int MenuInput::get_char(){
+    int user_input = getch();
     return user_input;
 }
 

@@ -13,8 +13,8 @@ public:
     const std::string& get_type() const;
     int get_quantity() const;
 
-    void set_object_name(const std::string& new_name);
-    void set_object_type(const std::string& new_type);
+    bool set_object_name(const std::string& new_name);
+    bool set_object_type(const std::string& new_type);
     void set_object_quantity(int new_quantity);
 
     bool operator<(const Object& object_to_compare);

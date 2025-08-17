@@ -11,7 +11,7 @@ int Database::get_database_id(){
     return database_id;
 }
 
-const string& Database::get_database_name(){
+const string& Database::get_database_name() const{
     return database_name;
 }
 
@@ -102,10 +102,15 @@ void Database::load_objects(){
 }
 
 bool Database::add_object(const string& name, const string& type, int quantity){
+    if(name.empty())
+        return false;
+    if(type.empty())
+        return false;
+    
     Object new_object(next_object_id, name, type, quantity);
     next_object_id++;
     database_objects.emplace_back(new_object);
-    return 1; // Confirmation
+    return true; // Confirmation
 }
 
 bool Database::delete_object(int id_to_find){
@@ -206,26 +211,14 @@ vector<Object> Database::find_object_by_quantity(const string& match_word){
     return temp_vector;
 }
 
-
-void Database::edit_object(int item_id, const string& new_name, const string& new_type, int new_quantity){
+void Database::edit_object(int item_id, const std::string& new_name, const std::string& new_type, int new_quantity, bool is_name, bool is_type, bool is_quantity){
     for(int i = 0; i < static_cast<int>(database_objects.size()); i++)
         if(database_objects[i].get_id() == item_id){
-                database_objects[i].set_object_name(new_name);
-                database_objects[i].set_object_type(new_type);
-                database_objects[i].set_object_quantity(new_quantity);
+                if(is_name)
+                    database_objects[i].set_object_name(new_name);
+                if(is_type)
+                    database_objects[i].set_object_type(new_type);
+                if(is_quantity)
+                    database_objects[i].set_object_quantity(new_quantity);
         }
-}
-
-void Database::edit_object(int item_id, const string& new_name, const string& new_type){
-    for(int i = 0; i < static_cast<int>(database_objects.size()); i++)
-        if(database_objects[i].get_id() == item_id){
-                database_objects[i].set_object_name(new_name);
-                database_objects[i].set_object_type(new_type);
-        }
-}
-
-void Database::edit_object(int item_id, const string& new_name){
-    for(int i = 0; i < static_cast<int>(database_objects.size()); i++)
-        if(database_objects[i].get_id() == item_id)
-                database_objects[i].set_object_name(new_name);
 }

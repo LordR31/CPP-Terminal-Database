@@ -73,7 +73,9 @@ int main() {
     getch();
     clear();
 
-    MenuLogic menu; // init menu logic
+    MenuInput user_input;
+    MenuUI menu_ui;
+    MenuLogic menu(user_input, menu_ui); // init menu logic
 
     int current_menu = 0;
     while(true){ // access the right menu, depending on each function's return

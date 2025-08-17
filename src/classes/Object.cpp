@@ -21,12 +21,18 @@ int Object::get_quantity() const{
     return quantity;
 }
 
-void Object::set_object_name(const std::string& new_name){
+bool Object::set_object_name(const std::string& new_name){
+    if(new_name.empty())
+        return false;    
     name = new_name;
+    return true;
 }
 
-void Object::set_object_type(const std::string& new_type){
+bool Object::set_object_type(const std::string& new_type){  
+    if(new_type.empty())
+        return false;
     type = new_type;
+    return true;
 }
 
 void Object::set_object_quantity(int new_quantity){
