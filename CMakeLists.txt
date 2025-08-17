@@ -82,6 +82,10 @@ file(GLOB TEST_SOURCES "tests/*.cpp")
 add_executable(database_manager_tests ${TEST_SOURCES}
     src/classes/Object.cpp
     src/classes/Database.cpp
+    src/classes/MenuUI.cpp
+    src/classes/MenuInput.cpp
+    src/classes/MenuLogic.cpp
+    src/utils.cpp
 )
 
 target_include_directories(database_manager_tests
@@ -93,6 +97,7 @@ target_include_directories(database_manager_tests
 target_link_libraries(database_manager_tests
     PRIVATE
         gtest_main
+        ${CURSES_LIBRARY}
 )
 
 enable_testing()
