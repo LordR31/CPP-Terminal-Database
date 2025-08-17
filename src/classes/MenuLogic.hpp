@@ -32,6 +32,8 @@
 #define ASCII_5 53
 #define ASCII_6 54
 #define ASCII_7 55
+
+#define WINDOWS_BACKSPACE 8
 #define ASCII_ENTER 10
 #define ASCII_WS 32
 

@@ -855,7 +855,7 @@ void MenuLogic::find_database(){
     while (true) {
         int input_char = menu_input.get_char();
 
-        if (input_char == KEY_BACKSPACE){
+        if (input_char == KEY_BACKSPACE || input_char == WINDOWS_BACKSPACE){
             if (counter > 0) {
                 input_word.pop_back();
                 counter--;
@@ -1091,7 +1091,7 @@ void MenuLogic::find_object_menu(){
     while (true) {
         int input_char = menu_input.get_char();
 
-        if (input_char == KEY_BACKSPACE){
+        if (input_char == KEY_BACKSPACE || input_char == WINDOWS_BACKSPACE){
             if (counter > 0) {
                 input_word.pop_back();
                 counter--;
