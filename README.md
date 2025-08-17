@@ -39,6 +39,8 @@ After this, simply use vcpkg to install PDCurses:
 
 `.\vcpkg install pdcurses`
 
+After installing PDCurses, the last thing is to add vcpkg to path. Make a new environment variable called VCPKG_ROOT and add to it the path to vcpkg root folder.
+
 The last steps are similar to the Linux method. 
 
 Go into the root folder of the project and run the CMake command with the windows preset
